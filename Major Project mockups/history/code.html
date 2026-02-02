@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Interview Summary - DSAMock AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#137fec",
+                "background-dark": "#0d1117",
+                "panel-dark": "#161b22",
+                "border-dark": "#30363d",
+                "editor-bg": "#010409",
+              },
+              fontFamily: {
+                "display": ["Space Grotesk", "sans-serif"],
+                "mono": ["Fira Code", "monospace"]
+              },
+            },
+          },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            font-family: "Space Grotesk", sans-serif;
+            background-color: #0d1117;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+        .metric-card {
+            background: linear-gradient(145deg, #161b22 0%, #0d1117 100%);
+        }
+    </style>
+</head>
+<body class="text-slate-200 h-screen flex flex-col overflow-hidden">
+<div class="flex flex-grow overflow-hidden">
+<aside class="w-64 border-r border-border-dark bg-panel-dark flex flex-col shrink-0">
+<div class="p-6">
+<div class="flex items-center gap-2 mb-8">
+<div class="w-7 h-7 bg-primary rounded flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</div>
+<h1 class="font-bold text-lg tracking-tight">DSAMock AI</h1>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-primary bg-primary/10 border border-primary/20 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span class="text-sm font-medium">History</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span class="text-sm font-medium">Progress</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-4 border-t border-border-dark">
+<button class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">add_box</span>
+                Try Another Mock
+            </button>
+</div>
+</aside>
+<main class="flex-grow flex flex-col overflow-hidden bg-background-dark">
+<header class="h-14 border-b border-border-dark flex items-center justify-between px-8 shrink-0 bg-panel-dark/50 backdrop-blur-md">
+<div class="flex items-center gap-2">
+<span class="text-slate-400 text-sm">History</span>
+<span class="material-symbols-outlined text-sm text-slate-600">chevron_right</span>
+<span class="text-slate-200 text-sm font-medium">Session #4829 - LRU Cache &amp; Graph</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-4 py-1.5 rounded-lg border border-border-dark text-slate-400 hover:bg-slate-800 hover:text-white transition-all text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">share</span>
+                    Share Results
+                </button>
+<button class="px-4 py-1.5 rounded-lg bg-slate-800 border border-border-dark text-slate-200 hover:bg-slate-700 transition-all text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">code</span>
+                    View Full Code
+                </button>
+</div>
+</header>
+<div class="flex-grow overflow-y-auto custom-scrollbar p-8">
+<div class="max-w-6xl mx-auto space-y-8">
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/20 to-emerald-500/10 border border-primary/20 p-8">
+<div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex items-center gap-6">
+<div class="w-24 h-24 rounded-full border-4 border-emerald-500/30 flex items-center justify-center bg-emerald-500/10">
+<div class="text-center">
+<span class="block text-3xl font-bold text-emerald-400">85</span>
+<span class="text-[10px] text-emerald-500/80 uppercase font-bold tracking-widest">Score</span>
+</div>
+</div>
+<div>
+<h2 class="text-3xl font-bold text-white mb-1 tracking-tight">Strong Performance</h2>
+<p class="text-slate-400 text-sm max-w-md">You've demonstrated exceptional problem-solving skills and a solid grasp of data structures. Some minor optimizations in space complexity were identified.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="bg-background-dark/50 rounded-xl px-5 py-3 border border-border-dark">
+<span class="block text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">Time Spent</span>
+<span class="text-xl font-mono text-white">44:21</span>
+</div>
+<div class="bg-background-dark/50 rounded-xl px-5 py-3 border border-border-dark">
+<span class="block text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">Difficulty</span>
+<span class="text-xl font-bold text-amber-500">Medium</span>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 space-y-6">
+<div class="bg-panel-dark border border-border-dark rounded-2xl p-6">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined">psychology</span>
+</div>
+<div>
+<h3 class="font-bold text-lg">AI Feedback Summary</h3>
+<p class="text-xs text-slate-500">Deep-dive analysis of your interview session</p>
+</div>
+</div>
+<div class="space-y-6">
+<div>
+<h4 class="text-sm font-bold text-slate-200 flex items-center gap-2 mb-3">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Technical Accuracy
+                                    </h4>
+<ul class="space-y-2 ml-3.5">
+<li class="text-sm text-slate-400 flex gap-2">
+<span class="text-emerald-500 font-bold">•</span>
+                                            Correctly implemented the LRU Cache using a hash map and doubly linked list.
+                                        </li>
+<li class="text-sm text-slate-400 flex gap-2">
+<span class="text-emerald-500 font-bold">•</span>
+                                            All edge cases including single-element capacity were handled gracefully.
+                                        </li>
+</ul>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-200 flex items-center gap-2 mb-3">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                        Code Quality
+                                    </h4>
+<ul class="space-y-2 ml-3.5">
+<li class="text-sm text-slate-400 flex gap-2">
+<span class="text-primary font-bold">•</span>
+                                            Modular approach with clear separation of responsibilities between LL and Cache.
+                                        </li>
+<li class="text-sm text-slate-400 flex gap-2">
+<span class="text-primary font-bold">•</span>
+                                            Variable naming follows standard Python PEP8 conventions.
+                                        </li>
+</ul>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-200 flex items-center gap-2 mb-3">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                        Communication
+                                    </h4>
+<ul class="space-y-2 ml-3.5">
+<li class="text-sm text-slate-400 flex gap-2">
+<span class="text-amber-500 font-bold">•</span>
+                                            Proactively explained the trade-offs between O(n) and O(1) implementations.
+                                        </li>
+<li class="text-sm text-slate-400 flex gap-2">
+<span class="text-amber-500 font-bold">•</span>
+                                            Responded well to hints and adjusted the strategy accordingly.
+                                        </li>
+</ul>
+</div>
+</div>
+</div>
+<div class="bg-panel-dark border border-border-dark rounded-2xl p-6">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<div>
+<h3 class="font-bold text-lg">Key Metrics</h3>
+<p class="text-xs text-slate-500">Performance comparison vs optimal benchmarks</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="metric-card p-4 border border-border-dark rounded-xl">
+<span class="block text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-2">Runtime Complexity</span>
+<div class="flex items-end gap-2 mb-2">
+<span class="text-2xl font-mono text-emerald-400">O(1)</span>
+<span class="text-[10px] text-slate-500 mb-1">Optimal</span>
+</div>
+<div class="w-full bg-slate-800 h-1.5 rounded-full">
+<div class="bg-emerald-500 h-full rounded-full w-full"></div>
+</div>
+</div>
+<div class="metric-card p-4 border border-border-dark rounded-xl">
+<span class="block text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-2">Memory Efficiency</span>
+<div class="flex items-end gap-2 mb-2">
+<span class="text-2xl font-mono text-amber-400">O(N)</span>
+<span class="text-[10px] text-slate-500 mb-1">+12% over optimal</span>
+</div>
+<div class="w-full bg-slate-800 h-1.5 rounded-full">
+<div class="bg-amber-500 h-full rounded-full w-3/4"></div>
+</div>
+</div>
+<div class="metric-card p-4 border border-border-dark rounded-xl">
+<span class="block text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-2">Coding Speed</span>
+<div class="flex items-end gap-2 mb-2">
+<span class="text-2xl font-mono text-primary">High</span>
+<span class="text-[10px] text-slate-500 mb-1">Top 15%</span>
+</div>
+<div class="w-full bg-slate-800 h-1.5 rounded-full">
+<div class="bg-primary h-full rounded-full w-[85%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-6">
+<div class="bg-panel-dark border border-border-dark rounded-2xl p-6 sticky top-0">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
+<span class="material-symbols-outlined">trending_up</span>
+</div>
+<div>
+<h3 class="font-bold text-lg">Improvement Plan</h3>
+<p class="text-xs text-slate-500">Targeted study recommendations</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="p-4 bg-background-dark/50 border border-border-dark rounded-xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-sm text-amber-500">school</span>
+<h4 class="text-sm font-bold text-slate-200 uppercase tracking-wide">Data Structures</h4>
+</div>
+<p class="text-xs text-slate-400 leading-relaxed mb-3">Review Doubly Linked List node removals to ensure garbage collection safety.</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-0.5 rounded-md bg-slate-800 text-[10px] text-slate-400 border border-border-dark">LRU Variants</span>
+<span class="px-2 py-0.5 rounded-md bg-slate-800 text-[10px] text-slate-400 border border-border-dark">Node Sync</span>
+</div>
+</div>
+<div class="p-4 bg-background-dark/50 border border-border-dark rounded-xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-sm text-primary">flash_on</span>
+<h4 class="text-sm font-bold text-slate-200 uppercase tracking-wide">Algorithms</h4>
+</div>
+<p class="text-xs text-slate-400 leading-relaxed mb-3">Focus on optimizing search in multi-index structures for faster access.</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-0.5 rounded-md bg-slate-800 text-[10px] text-slate-400 border border-border-dark">Hash Maps</span>
+<span class="px-2 py-0.5 rounded-md bg-slate-800 text-[10px] text-slate-400 border border-border-dark">Caches</span>
+</div>
+</div>
+<div class="p-4 bg-background-dark/50 border border-border-dark rounded-xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-sm text-emerald-500">record_voice_over</span>
+<h4 class="text-sm font-bold text-slate-200 uppercase tracking-wide">Soft Skills</h4>
+</div>
+<p class="text-xs text-slate-400 leading-relaxed mb-3">Practice explaining your thoughts while coding to maintain a better flow.</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-0.5 rounded-md bg-slate-800 text-[10px] text-slate-400 border border-border-dark">Think Aloud</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-3 border border-primary/30 text-primary hover:bg-primary/5 rounded-xl text-sm font-bold transition-all">
+                                Generate Study Guide
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

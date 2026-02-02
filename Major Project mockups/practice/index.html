@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>DSA Interviewer - Problem List</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+    <div class="flex min-h-screen">
+        
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col min-w-0">
+            <!-- PageHeading -->
+            <header class="px-8 pt-10 pb-6">
+                <div class="flex flex-col gap-2 max-w-5xl">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Problem Library</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-base max-w-2xl">Master data structures and
+                        algorithms with our curated collection. Select a problem to begin a 45-minute simulated
+                        technical interview with an LLM interviewer.</p>
+                </div>
+            </header>
+            <div class="px-8 pb-10 flex flex-col gap-6 max-w-6xl">
+                <!-- SearchBar & Chips Container -->
+                <div class="flex flex-col md:flex-row md:items-center gap-4">
+                    <div class="flex-1">
+                        <div class="relative group">
+                            <div
+                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+                                <span class="material-symbols-outlined text-[22px]">search</span>
+                            </div>
+                            <input
+                                class="block w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                placeholder="Search by title, keyword, or company tag..." type="text" />
+                        </div>
+                    </div>
+                    <div class="flex gap-2 flex-wrap">
+                        <button
+                            class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-primary/50 transition-all">
+                            <span
+                                class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Difficulty</span>
+                            <span class="material-symbols-outlined text-sm">expand_more</span>
+                        </button>
+                        <button
+                            class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-primary/50 transition-all">
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Status</span>
+                            <span class="material-symbols-outlined text-sm">expand_more</span>
+                        </button>
+                        <button
+                            class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-primary/50 transition-all">
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Topic</span>
+                            <span class="material-symbols-outlined text-sm">expand_more</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Chips (Active Filters or Quick Tags) -->
+                <div class="flex flex-wrap gap-2">
+                    <span
+                        class="px-3 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full flex items-center gap-1.5 border border-primary/20">
+                        Arrays <span class="material-symbols-outlined text-[14px] cursor-pointer">close</span>
+                    </span>
+                    <span
+                        class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs font-medium rounded-full border border-slate-200 dark:border-slate-700">
+                        Top 75 LeetCode
+                    </span>
+                    <span
+                        class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs font-medium rounded-full border border-slate-200 dark:border-slate-700">
+                        Google Prep
+                    </span>
+                </div>
+                <!-- Table -->
+                <div
+                    class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr
+                                    class="bg-slate-50 dark:bg-slate-800/50 border-bottom border-slate-200 dark:border-slate-800">
+                                    <th
+                                        class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                                        Title</th>
+                                    <th
+                                        class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                                        Difficulty</th>
+                                    <th
+                                        class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                                        Category</th>
+                                    <th
+                                        class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                                        Success Rate</th>
+                                    <th
+                                        class="px-6 py-4 text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 text-right">
+                                        Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                                <!-- Row 1 -->
+                                <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <span
+                                                class="material-symbols-outlined text-green-500 text-[18px]">check_circle</span>
+                                            <span class="text-sm font-semibold dark:text-slate-200">Two Sum</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span
+                                            class="text-[11px] font-bold px-2 py-0.5 rounded border border-emerald-500/20 bg-emerald-500/10 text-emerald-500 uppercase tracking-tighter">Easy</span>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span class="text-xs text-slate-500 dark:text-slate-400">Arrays &amp; Hash
+                                            Tables</span>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-2">
+                                            <div
+                                                class="w-16 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                                <div class="bg-emerald-500 h-full w-[85%]"></div>
+                                            </div>
+                                            <span class="text-xs font-medium text-slate-500">85%</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5 text-right">
+                                        <button
+                                            class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/10">
+                                            START <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- Row 2 -->
+                                <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <span
+                                                class="material-symbols-outlined text-slate-300 dark:text-slate-700 text-[18px]">circle</span>
+                                            <span class="text-sm font-semibold dark:text-slate-200">Longest Palindromic
+                                                Substring</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span
+                                            class="text-[11px] font-bold px-2 py-0.5 rounded border border-amber-500/20 bg-amber-500/10 text-amber-500 uppercase tracking-tighter">Medium</span>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span class="text-xs text-slate-500 dark:text-slate-400">Dynamic
+                                            Programming</span>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-2">
+                                            <div
+                                                class="w-16 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                                <div class="bg-amber-500 h-full w-[42%]"></div>
+                                            </div>
+                                            <span class="text-xs font-medium text-slate-500">42%</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5 text-right">
+                                        <button
+                                            class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/10">
+                                            START <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- Row 3 -->
+                                <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <span
+                                                class="material-symbols-outlined text-slate-300 dark:text-slate-700 text-[18px]">circle</span>
+                                            <span class="text-sm font-semibold dark:text-slate-200">Median of Two Sorted
+                                                Arrays</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span
+                                            class="text-[11px] font-bold px-2 py-0.5 rounded border border-rose-500/20 bg-rose-500/10 text-rose-500 uppercase tracking-tighter">Hard</span>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span class="text-xs text-slate-500 dark:text-slate-400">Binary Search</span>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-2">
+                                            <div
+                                                class="w-16 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                                <div class="bg-rose-500 h-full w-[28%]"></div>
+                                            </div>
+                                            <span class="text-xs font-medium text-slate-500">28%</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5 text-right">
+                                        <button
+                                            class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/10">
+                                            START <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- Row 4 -->
+                                <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <span
+                                                class="material-symbols-outlined text-slate-300 dark:text-slate-700 text-[18px]">circle</span>
+                                            <span class="text-sm font-semibold dark:text-slate-200">LRU Cache</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span
+                                            class="text-[11px] font-bold px-2 py-0.5 rounded border border-amber-500/20 bg-amber-500/10 text-amber-500 uppercase tracking-tighter">Medium</span>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span class="text-xs text-slate-500 dark:text-slate-400">Design</span>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-2">
+                                            <div
+                                                class="w-16 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                                <div class="bg-amber-500 h-full w-[55%]"></div>
+                                            </div>
+                                            <span class="text-xs font-medium text-slate-500">55%</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5 text-right">
+                                        <button
+                                            class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/10">
+                                            START <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- Row 5 -->
+                                <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <span
+                                                class="material-symbols-outlined text-green-500 text-[18px]">check_circle</span>
+                                            <span class="text-sm font-semibold dark:text-slate-200">Valid
+                                                Parentheses</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span
+                                            class="text-[11px] font-bold px-2 py-0.5 rounded border border-emerald-500/20 bg-emerald-500/10 text-emerald-500 uppercase tracking-tighter">Easy</span>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span class="text-xs text-slate-500 dark:text-slate-400">Stacks</span>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-2">
+                                            <div
+                                                class="w-16 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                                <div class="bg-emerald-500 h-full w-[91%]"></div>
+                                            </div>
+                                            <span class="text-xs font-medium text-slate-500">91%</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5 text-right">
+                                        <button
+                                            class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/10">
+                                            START <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Footer Pagination -->
+                <div class="flex items-center justify-between mt-2">
+                    <p class="text-xs text-slate-500">Showing <span class="font-semibold">1-5</span> of <span
+                            class="font-semibold">248</span> problems</p>
+                    <div class="flex gap-1">
+                        <button
+                            class="size-8 flex items-center justify-center rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-400 cursor-not-allowed">
+                            <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                        </button>
+                        <button
+                            class="size-8 flex items-center justify-center rounded bg-primary text-white font-bold text-xs border border-primary">
+                            1
+                        </button>
+                        <button
+                            class="size-8 flex items-center justify-center rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary/50 text-xs">
+                            2
+                        </button>
+                        <button
+                            class="size-8 flex items-center justify-center rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary/50 text-xs">
+                            3
+                        </button>
+                        <button
+                            class="size-8 flex items-center justify-center rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary/50">
+                            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>
