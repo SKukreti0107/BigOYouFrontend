@@ -2,7 +2,18 @@ import AIChatMessage from "./AIChatMessage"
 import UserChatMessage from "./UserChatMessage"
 import AIChatHint from "./AIChatHint"
 import UserChatInput from "./UserChatInput"
+import { useEffect, useRef } from "react"
+
 export default function AIChatWindow({ chat_messages, curr_phase, onSendUserMessage }) {
+    const messagesEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [chat_messages]);
 
     const handleSendUserMessage = (message) => {
         if (onSendUserMessage) {
@@ -10,11 +21,8 @@ export default function AIChatWindow({ chat_messages, curr_phase, onSendUserMess
         }
     }
 
-    
-
-
     return (
-        <section className="w-[500px] flex flex-col border-l border-border-dark bg-panel-dark">
+        <section className="h-full flex flex-col bg-panel-dark min-h-0">
             <div className="p-4 border-b border-border-dark flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center">
                     <span className="material-symbols-outlined text-[20px]">psychology</span>
@@ -27,25 +35,25 @@ export default function AIChatWindow({ chat_messages, curr_phase, onSendUserMess
                     </span>
                 </div>
             </div>
-            <div className="flex-grow overflow-y-auto p-4 space-y-4 custom-scrollbar">
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 custom-scrollbar">
                 {chat_messages.length === 0 ?
-                (<AIChatMessage></AIChatMessage>):(
-                    chat_messages.map((msg,index)=>{
-                        const msgType = (msg.type || "").toLowerCase();
-                        if(msgType == "user"){
-                            return <UserChatMessage key={index} text={msg.text}></UserChatMessage>
-                        }
-                        else if(msgType == "ai"){
-                            return <AIChatMessage key={index} text={msg.text}></AIChatMessage>
-                        }
-                        else{
-                            return <AIChatHint key={index} text={msg.text}></AIChatHint>
-                        }
-                    })
-                )}
-                
+                    (<AIChatMessage></AIChatMessage>) : (
+                        chat_messages.map((msg, index) => {
+                            const msgType = (msg.type || "").toLowerCase();
+                            if (msgType == "user") {
+                                return <UserChatMessage key={index} text={msg.text}></UserChatMessage>
+                            }
+                            else if (msgType == "ai") {
+                                return <AIChatMessage key={index} text={msg.text}></AIChatMessage>
+                            }
+                            else {
+                                return <AIChatHint key={index} text={msg.text}></AIChatHint>
+                            }
+                        })
+                    )}
+                <div ref={messagesEndRef} />
             </div>
-            {curr_phase=="PROBLEM_DISCUSSION"?null:(<div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800">
+            {curr_phase == "PROBLEM_DISCUSSION" ? null : (<div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800">
                 <UserChatInput onSendMessage={handleSendUserMessage}></UserChatInput>
                 <div className="flex items-center justify-between mt-3 px-1">
                     <button className="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
@@ -54,7 +62,7 @@ export default function AIChatWindow({ chat_messages, curr_phase, onSendUserMess
                     </button>
                 </div>
             </div>)}
-            
+
         </section>
     )
 }

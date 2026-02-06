@@ -1,25 +1,32 @@
 import ChatMessage from "./ChatMessage"
-
-let demo = (
-    <>
-        We will start with the interview shortly !!
-    </>
-)
+import ReactMarkdown from 'react-markdown';
+let demo = "We will start with the interview shortly !!"
 
 export default function AIChatMessage({ text = demo }) {
     return (
         <ChatMessage align="gap-2 max-w-[90%]" accent="bg-slate-800" sender="ai">
-            {text}
+            <div className="prose prose-invert prose-sm max-w-none">
+                <ReactMarkdown
+                    components={{
+                        pre: ({ node, ...props }) => (
+                            <div className="overflow-x-auto my-2 bg-slate-900/50 rounded-lg p-3 scrollbar-thin scrollbar-thumb-slate-700">
+                                <pre className="font-mono text-xs" {...props} />
+                            </div>
+                        ),
+                        code: ({ node, inline, ...props }) => (
+                            inline
+                                ? <code className="bg-slate-700/50 px-1 py-0.5 rounded font-mono text-xs" {...props} />
+                                : <code {...props} />
+                        ),
+                        p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                        ul: ({ node, ...props }) => <ul className="list-disc ml-4 mb-2" {...props} />,
+                        ol: ({ node, ...props }) => <ol className="list-decimal ml-4 mb-2" {...props} />,
+                    }}
+                >
+                    {text}
+                </ReactMarkdown>
+            </div>
         </ChatMessage>
 
-        // <div className="flex flex-col gap-2 max-w-[90%]">
-        //     <div className="bg-slate-800 rounded-2xl rounded-tl-none p-3 text-sm leading-relaxed border border-border-dark">
-        //         Great start! I see you're planning to use a dictionary for the cache. How do you plan to maintain the
-        //         O(1) time complexity for both <code className="text-primary font-mono text-[11px]">get</code> and{' '}
-        //         <code className="text-primary font-mono text-[11px]">put</code> operations, specifically when it comes to
-        //         ordering?
-        //     </div>
-        //     <span className="text-[10px] text-slate-500 ml-1">AI Interviewer • Just now</span>
-        // </div>
     )
 }

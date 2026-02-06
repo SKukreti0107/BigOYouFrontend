@@ -1,4 +1,5 @@
 import CodingTimer from "./CodingTimer"
+import Notepad from "./notepad"
 const demo = {
   title: "Two Sum",
   statement: "	Given an array of integers nums and an integer target, return the indices of the two numbers that add up to target. You may assume each input has exactly one solution, and you cannot use the same element twice.",
@@ -35,6 +36,7 @@ export default function InterviewSidebar({ problem_deets = demo, onRun, curr_pha
           </div>
         </article>
       </div>
+      {/* {curr_phase!="PROBLEM_DISCUSSION"?(<Notepad/>):null} */}
       <div className="p-4 border-t border-border-dark flex gap-2">
         {curr_phase == "PROBLEM_DISCUSSION" ? null : (
           <>
