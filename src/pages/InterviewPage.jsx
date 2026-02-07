@@ -10,7 +10,7 @@ import { useState, useEffect, useCallback } from "react"
 import api from "../components/Api"
 
 import { PYTHON_STARTER_CODE, CPP_STARTER_CODE, JAVA_STARTER_CODE } from "../components/StartedCode"
-import Notepad from "../components/notepad"
+import Notepad from "../components/Notepad"
 
 
 
