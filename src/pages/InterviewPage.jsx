@@ -63,14 +63,22 @@ export default function InterviewPage() {
     setCode(newCode);
   };
 
+  const FEEDBACK_KEY = `interview.feedback.${sessionId}`;
+  const [feedbackData, setFeedbackData] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem(FEEDBACK_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch { return null; }
+  });
+
   const [output, setOutput] = useState("");
   const [hasRunCode, setHasRunCode] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingType, setLoadingType] = useState(null); // 'RUNNING', 'STARTING', 'DRY_RUN', 'FEEDBACK', 'APPROACH_REVIEW', 'MESSAGE'
 
 
   const handleRun = async () => {
     try {
-      setIsLoading(true);
+      setLoadingType('RUNNING');
       let res = await api.post("/execute", { language: language, code: code, session_id: sessionId })
       let agent_res = await api.post("/interview/coding", {
         session_id: sessionId,
@@ -86,7 +94,7 @@ export default function InterviewPage() {
       console.error("Error in handleRun:", error);
       alert("Failed to execute code. Please check your connection.");
     } finally {
-      setIsLoading(false);
+      setLoadingType(null);
     }
   }
 
@@ -130,7 +138,7 @@ export default function InterviewPage() {
 
   const handleStartCoding = async () => {
     try {
-      setIsLoading(true);
+      setLoadingType('STARTING');
       let res = await api.post("/interview/coding", {
         session_id: sessionId,
         message: "I'm ready to start coding.",
@@ -143,13 +151,13 @@ export default function InterviewPage() {
       console.error("Error in handleStartCoding:", error);
       alert("Failed to transition to coding phase.");
     } finally {
-      setIsLoading(false);
+      setLoadingType(null);
     }
   }
 
   const handleDryRun = async () => {
     try {
-      setIsLoading(true);
+      setLoadingType('DRY_RUN');
       let res = await api.post("/interview/review", {
         session_id: sessionId,
         message: "I'd like to do a dry run of my solution.",
@@ -162,13 +170,13 @@ export default function InterviewPage() {
       console.error("Error in handleDryRun:", error);
       alert("Failed to transition to dry run phase.");
     } finally {
-      setIsLoading(false);
+      setLoadingType(null);
     }
   }
 
   const handleFeedback = async () => {
     try {
-      setIsLoading(true);
+      setLoadingType('FEEDBACK');
       console.log("Generating feedback...");
       let res = await api.post("/interview/feedback", {
         session_id: sessionId,
@@ -177,6 +185,10 @@ export default function InterviewPage() {
         language: language
       });
       console.log("Feedback response received:", res.data);
+      if (res?.data) {
+        setFeedbackData(res.data);
+        sessionStorage.setItem(FEEDBACK_KEY, JSON.stringify(res.data));
+      }
       if (res?.data?.response) {
         handleAddMessage(res.data.response, "ai");
       }
@@ -185,7 +197,7 @@ export default function InterviewPage() {
       console.error("Error in handleFeedback:", error);
       alert("Failed to generate feedback. Please try again.");
     } finally {
-      setIsLoading(false);
+      setLoadingType(null);
     }
   }
 
@@ -216,22 +228,29 @@ ${message}
 
     if (!endpoint) return;
 
-    const res = await api.post(endpoint, {
-      session_id: sessionId,
-      message: contextWrappedMessage,
-      code: code,
-      language: language,
-    });
+    try {
+      setLoadingType('MESSAGE');
+      const res = await api.post(endpoint, {
+        session_id: sessionId,
+        message: contextWrappedMessage,
+        code: code,
+        language: language,
+      });
 
-    if (res?.data?.response) {
-      handleAddMessage(res.data.response, "ai");
+      if (res?.data?.response) {
+        handleAddMessage(res.data.response, "ai");
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+    } finally {
+      setLoadingType(null);
     }
   }
 
   return (
     <div className="bg-[#0d1117] text-slate-200 h-screen flex flex-col overflow-hidden">
       <InterviewPageNav curr_phase={phase}></InterviewPageNav>
-      {isLoading && (
+      {loadingType === 'FEEDBACK' && (
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
           <p className="text-xl font-bold">Generating AI Feedback...</p>
@@ -240,20 +259,20 @@ ${message}
       )}
       {phase != "FEEDBACK" ? (
         <main className="flex-grow flex overflow-hidden">
-          <InterviewSidebar problem_deets={session.problem} onRun={handleRun} curr_phase={phase} onDryRun={handleDryRun} onEndReview={handleFeedback} hasRunCode={hasRunCode} setPhase={setPhase}></InterviewSidebar>
+          <InterviewSidebar problem_deets={session.problem} onRun={handleRun} curr_phase={phase} onDryRun={handleDryRun} onEndReview={handleFeedback} hasRunCode={hasRunCode} setPhase={setPhase} loadingType={loadingType}></InterviewSidebar>
 
           <div className="flex-grow flex flex-col">
-            {(phase == "PROBLEM_DISCUSSION") ? <Notepad session_id={sessionId} onStartCoding={handleStartCoding} onSetMessage={handleAddMessage} curr_phase={phase}></Notepad> : (<><CodeEditor code={code} onChange={setCode} language={language} setLanguage={handleLanguageChange} curr_phase={phase}></CodeEditor>
+            {(phase == "PROBLEM_DISCUSSION") ? <Notepad session_id={sessionId} onStartCoding={handleStartCoding} onSetMessage={handleAddMessage} curr_phase={phase} loadingType={loadingType} setLoadingType={setLoadingType}></Notepad> : (<><CodeEditor code={code} onChange={setCode} language={language} setLanguage={handleLanguageChange} curr_phase={phase}></CodeEditor>
               <TerminalOutput output={output}></TerminalOutput></>
             )
             }
           </div>
 
-          <InterviewRightSidebar session_id={sessionId} messages={messages} phase={phase} handleSendUserMessage={handleSendUserMessage} handleAddMessage={handleAddMessage}></InterviewRightSidebar>
+          <InterviewRightSidebar session_id={sessionId} messages={messages} phase={phase} handleSendUserMessage={handleSendUserMessage} handleAddMessage={handleAddMessage} loadingType={loadingType} setLoadingType={setLoadingType}></InterviewRightSidebar>
         </main>
       ) : (
         <main className="flex-grow flex overflow-hidden p-8 overflow-y-auto">
-          <InterviewFeedback feedback={[...messages].reverse().find(m => m.type.toLowerCase() === "ai")?.text}></InterviewFeedback>
+          <InterviewFeedback feedback={feedbackData}></InterviewFeedback>
         </main>
       )}
 

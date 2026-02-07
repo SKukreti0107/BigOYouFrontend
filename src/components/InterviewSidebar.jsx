@@ -7,7 +7,11 @@ const demo = {
   expected_time: "12"
 }
 
-export default function InterviewSidebar({ problem_deets = demo, onRun, curr_phase, onDryRun, onEndReview, hasRunCode = false, setPhase }) {
+const ButtonSpinner = () => (
+  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+);
+
+export default function InterviewSidebar({ problem_deets = demo, onRun, curr_phase, onDryRun, onEndReview, hasRunCode = false, setPhase, loadingType }) {
 
   return (
     <section className="w-[450px] flex flex-col border-r border-border-dark bg-panel-dark overflow-hidden">
@@ -38,27 +42,32 @@ export default function InterviewSidebar({ problem_deets = demo, onRun, curr_pha
       <div className="p-4 border-t border-border-dark flex gap-2">
         {curr_phase == "PROBLEM_DISCUSSION" ? null : (
           <>
-            <button onClick={onRun} className="flex-grow flex items-center justify-center gap-2 py-2 px-4 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all shadow-lg shadow-emerald-900/20">
-              <span className="material-symbols-outlined text-sm">play_arrow</span>
-              Run Code
+            <button
+              onClick={onRun}
+              disabled={loadingType !== null}
+              className={`flex-grow flex items-center justify-center gap-2 py-2 px-4 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all shadow-lg shadow-emerald-900/20 ${loadingType !== null ? "opacity-70 cursor-not-allowed" : ""}`}
+            >
+              {loadingType === 'RUNNING' ? <ButtonSpinner /> : <span className="material-symbols-outlined text-sm">play_arrow</span>}
+              {loadingType === 'RUNNING' ? "Running..." : "Run Code"}
             </button>
             {(curr_phase == "REVIEW") ? (
               <button
                 onClick={onEndReview}
-                className="flex-grow flex items-center justify-center gap-2 py-2 px-4 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all shadow-lg shadow-indigo-900/20"
+                disabled={loadingType !== null}
+                className={`flex-grow flex items-center justify-center gap-2 py-2 px-4 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all shadow-lg shadow-indigo-900/20 ${loadingType !== null ? "opacity-70 cursor-not-allowed" : ""}`}
               >
-                <span className="material-symbols-outlined text-sm">done_all</span>
-                End & Generate Feedback
+                {loadingType === 'FEEDBACK' ? <ButtonSpinner /> : <span className="material-symbols-outlined text-sm">done_all</span>}
+                {loadingType === 'FEEDBACK' ? "Generating..." : "End & Generate Feedback"}
               </button>
             ) : (
               <button
                 onClick={onDryRun}
-                disabled={!hasRunCode}
-                className={`flex-grow flex items-center justify-center gap-2 py-2 px-4 rounded text-white font-bold transition-all shadow-lg shadow-emerald-900/20 ${hasRunCode ? "bg-yellow-600 hover:bg-yellow-500" : "bg-yellow-600/50 cursor-not-allowed"
+                disabled={!hasRunCode || loadingType !== null}
+                className={`flex-grow flex items-center justify-center gap-2 py-2 px-4 rounded text-white font-bold transition-all shadow-lg shadow-emerald-900/20 ${hasRunCode && loadingType === null ? "bg-yellow-600 hover:bg-yellow-500" : "bg-yellow-600/50 cursor-not-allowed"
                   }`}
               >
-                <span className="material-symbols-outlined text-sm">play_arrow</span>
-                Proceed to Dry Run
+                {loadingType === 'DRY_RUN' ? <ButtonSpinner /> : <span className="material-symbols-outlined text-sm">play_arrow</span>}
+                {loadingType === 'DRY_RUN' ? "Proceeding..." : "Proceed to Dry Run"}
               </button>
             )}
           </>

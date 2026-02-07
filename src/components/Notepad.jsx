@@ -2,7 +2,11 @@ import TextareaAutosize from "@mui/material/TextareaAutosize";
 import api from "./Api";
 import { useState, useEffect } from "react";
 
-export default function Notepad({ session_id, onStartCoding, onSetMessage, curr_phase }) {
+const ButtonSpinner = () => (
+  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+);
+
+export default function Notepad({ session_id, onStartCoding, onSetMessage, curr_phase, loadingType, setLoadingType }) {
   const STORAGE_KEY = `interview.notepad.${session_id}`;
 
   const [approach, setApproach] = useState(() => {
@@ -14,9 +18,16 @@ export default function Notepad({ session_id, onStartCoding, onSetMessage, curr_
   }, [approach, STORAGE_KEY]);
 
   const onReviewApproach = async () => {
-    let res = await api.post('/interview/problem_discussion', { session_id: session_id, message: approach })
-    console.log(res.data)
-    onSetMessage(res.data.response)
+    try {
+      setLoadingType('APPROACH_REVIEW');
+      let res = await api.post('/interview/problem_discussion', { session_id: session_id, message: approach })
+      console.log(res.data)
+      onSetMessage(res.data.response)
+    } catch (error) {
+      console.error("Error reviewing approach:", error);
+    } finally {
+      setLoadingType(null);
+    }
   }
 
   const onApproachInput = (event) => {
@@ -52,18 +63,22 @@ export default function Notepad({ session_id, onStartCoding, onSetMessage, curr_
       {curr_phase == "PROBLEM_DISCUSSION" ? (<div className="flex justify-between p-1 items-center" style={{ backgroundColor: "#181a22" }}>
         <button
           type="button"
-          className="px-4 py-2 rounded bg-green-900 hover:bg-green-800"
+          disabled={loadingType !== null}
+          className={`px-4 py-2 rounded text-white font-bold transition-all flex items-center gap-2 ${loadingType !== null ? "bg-green-900/50 cursor-not-allowed" : "bg-green-900 hover:bg-green-800"}`}
           onClick={onReviewApproach}
         >
-          Review my approach
+          {loadingType === 'APPROACH_REVIEW' ? <ButtonSpinner /> : null}
+          {loadingType === 'APPROACH_REVIEW' ? "Reviewing..." : "Review my approach"}
         </button>
-        <span>If you feel confident and ready, proceed to coding.</span>
+        <span className="text-sm text-slate-400">If you feel confident and ready, proceed to coding.</span>
         <button
           type="button"
-          className="px-4 py-2 rounded bg-indigo-600 hover:bg-indigo-500"
+          disabled={loadingType !== null}
+          className={`px-4 py-2 rounded text-white font-bold transition-all flex items-center gap-2 ${loadingType !== null ? "bg-indigo-600/50 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-500"}`}
           onClick={onStartCoding}
         >
-          Start coding
+          {loadingType === 'STARTING' ? <ButtonSpinner /> : null}
+          {loadingType === 'STARTING' ? "Starting..." : "Start coding"}
         </button>
       </div>) : null}
 

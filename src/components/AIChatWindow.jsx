@@ -4,7 +4,7 @@ import AIChatHint from "./AIChatHint"
 import UserChatInput from "./UserChatInput"
 import { useEffect, useRef } from "react"
 
-export default function AIChatWindow({ chat_messages, curr_phase, onSendUserMessage }) {
+export default function AIChatWindow({ chat_messages, curr_phase, onSendUserMessage, loadingType }) {
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -13,7 +13,7 @@ export default function AIChatWindow({ chat_messages, curr_phase, onSendUserMess
 
     useEffect(() => {
         scrollToBottom();
-    }, [chat_messages]);
+    }, [chat_messages, loadingType]);
 
     const handleSendUserMessage = (message) => {
         if (onSendUserMessage) {
@@ -31,7 +31,7 @@ export default function AIChatWindow({ chat_messages, curr_phase, onSendUserMess
                     <h3 className="font-bold text-sm">AI Interviewer</h3>
                     <span className="text-[10px] text-emerald-500 flex items-center gap-1">
                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                        Analyzing your solution
+                        {loadingType === 'MESSAGE' ? 'Thinking...' : 'Analyzing your solution'}
                     </span>
                 </div>
             </div>
@@ -51,6 +51,14 @@ export default function AIChatWindow({ chat_messages, curr_phase, onSendUserMess
                             }
                         })
                     )}
+                {loadingType === 'MESSAGE' && (
+                    <div className="flex items-center gap-2 text-slate-500 italic text-xs animate-pulse p-2">
+                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
+                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                        AI is thinking...
+                    </div>
+                )}
                 <div ref={messagesEndRef} />
             </div>
             {curr_phase == "PROBLEM_DISCUSSION" ? null : (<div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800">
