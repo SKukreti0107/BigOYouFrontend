@@ -1,5 +1,4 @@
 import CodingTimer from "./CodingTimer"
-import Notepad from "./notepad"
 const demo = {
   title: "Two Sum",
   statement: "	Given an array of integers nums and an integer target, return the indices of the two numbers that add up to target. You may assume each input has exactly one solution, and you cannot use the same element twice.",
@@ -8,14 +7,14 @@ const demo = {
   expected_time: "12"
 }
 
-export default function InterviewSidebar({ problem_deets = demo, onRun, curr_phase, onDryRun, onEndReview, hasRunCode = false }) {
+export default function InterviewSidebar({ problem_deets = demo, onRun, curr_phase, onDryRun, onEndReview, hasRunCode = false, setPhase }) {
 
   return (
     <section className="w-[450px] flex flex-col border-r border-border-dark bg-panel-dark overflow-hidden">
       <div className="p-4 border-b border-border-dark flex items-center justify-between bg-background-dark/50">
         <div className="flex items-center gap-2 text-primary">
           <span className="material-symbols-outlined text-xl">timer</span>
-          <span className="font-mono text-lg font-bold"><CodingTimer minutes={problem_deets.expected_time}></CodingTimer></span>
+          <span className="font-mono text-lg font-bold"><CodingTimer minutes={problem_deets.expected_time} setPhase={setPhase}></CodingTimer></span>
         </div>
         {/* <div className="text-xs  font-medium">{problem_deets.expected_time} minutes</div> */}
       </div>

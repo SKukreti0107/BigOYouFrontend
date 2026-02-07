@@ -69,8 +69,15 @@ export default function InterviewPage() {
 
   const handleRun = async () => {
     let res = await api.post("/execute", { language: language, code: code })
+    let agent_res = await api.post("/interview/coding", {
+      session_id: sessionId,
+      message: "I ran my code and got this output: " + res.data.output,
+      code: code,
+      language: language
+    });
     let out = res.data;
     setOutput(out.error ? out.error : out.output)
+    handleAddMessage(agent_res.data.response);
     setHasRunCode(true);
   }
 
@@ -134,7 +141,7 @@ export default function InterviewPage() {
     setPhase("REVIEW");
   }
 
-  const handleEndReview = async () => {
+  const handleFeedback = async () => {
     let res = await api.post("/interview/feedback", {
       session_id: sessionId,
       message: "I'm done. Please provide feedback.",
@@ -191,7 +198,7 @@ ${message}
       <InterviewPageNav curr_phase={phase}></InterviewPageNav>
       {phase != "FEEDBACK" ? (
         <main className="flex-grow flex overflow-hidden">
-          <InterviewSidebar problem_deets={session.problem} onRun={handleRun} curr_phase={phase} onDryRun={handleDryRun} onEndReview={handleEndReview} hasRunCode={hasRunCode}></InterviewSidebar>
+          <InterviewSidebar problem_deets={session.problem} onRun={handleRun} curr_phase={phase} onDryRun={handleDryRun} onEndReview={handleFeedback} hasRunCode={hasRunCode} setPhase={setPhase}></InterviewSidebar>
 
           <div className="flex-grow flex flex-col">
             {(phase == "PROBLEM_DISCUSSION") ? <Notepad session_id={sessionId} onStartCoding={handleStartCoding} onSetMessage={handleAddMessage} curr_phase={phase}></Notepad> : (<><CodeEditor code={code} onChange={setCode} language={language} setLanguage={handleLanguageChange} curr_phase={phase}></CodeEditor>

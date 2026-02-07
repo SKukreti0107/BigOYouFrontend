@@ -1,15 +1,17 @@
-import { useState } from "react";
 import Editor from "@monaco-editor/react";
 
 
 
-export default function CodeEditor({ code, onChange, language, setLanguage }) {
+export default function CodeEditor({ code, onChange, language, setLanguage, curr_phase }) {
 
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
   }
 
+  const isReadOnly = curr_phase !== "CODING"
+
   return (
+    
     <div className="h-full flex flex-col w-full">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 bg-[#0f172a] border-b border-gray-700">
@@ -41,6 +43,7 @@ export default function CodeEditor({ code, onChange, language, setLanguage }) {
           wordWrap: "on",
           automaticLayout: true,
           tabSize: 4,
+          readOnly: isReadOnly
         }}
       />
     </div>
