@@ -14,9 +14,8 @@ export default function InterviewSidebar({ problem_deets = demo, onRun, curr_pha
       <div className="p-4 border-b border-border-dark flex items-center justify-between bg-background-dark/50">
         <div className="flex items-center gap-2 text-primary">
           <span className="material-symbols-outlined text-xl">timer</span>
-          <span className="font-mono text-lg font-bold"><CodingTimer minutes={problem_deets.expected_time} setPhase={setPhase}></CodingTimer></span>
+          <span className="font-mono text-lg font-bold"><CodingTimer minutes={problem_deets.expected_time} setPhase={setPhase} curr_phase={curr_phase}></CodingTimer></span>
         </div>
-        {/* <div className="text-xs  font-medium">{problem_deets.expected_time} minutes</div> */}
       </div>
       <div className="flex-grow overflow-y-auto p-6 custom-scrollbar">
         <div className="mb-6">
@@ -55,9 +54,8 @@ export default function InterviewSidebar({ problem_deets = demo, onRun, curr_pha
               <button
                 onClick={onDryRun}
                 disabled={!hasRunCode}
-                className={`flex-grow flex items-center justify-center gap-2 py-2 px-4 rounded text-white font-bold transition-all shadow-lg shadow-emerald-900/20 ${
-                  hasRunCode ? "bg-yellow-600 hover:bg-yellow-500" : "bg-yellow-600/50 cursor-not-allowed"
-                }`}
+                className={`flex-grow flex items-center justify-center gap-2 py-2 px-4 rounded text-white font-bold transition-all shadow-lg shadow-emerald-900/20 ${hasRunCode ? "bg-yellow-600 hover:bg-yellow-500" : "bg-yellow-600/50 cursor-not-allowed"
+                  }`}
               >
                 <span className="material-symbols-outlined text-sm">play_arrow</span>
                 Proceed to Dry Run

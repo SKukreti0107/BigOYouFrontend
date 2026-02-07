@@ -3,9 +3,10 @@ import api from "./Api";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-export default function CodingTimer({ minutes, onTimeUp, setPhase }) {
+export default function CodingTimer({ minutes, onTimeUp, setPhase,curr_phase }) {
   const { sessionId } = useParams();
   const [remainingTime, setRemainingTime] = useState(minutes * 60);
+  const [isFrozen, setIsFrozen] = useState(curr_phase!="CODING"&&curr_phase!="PROBLEM_DISCUSSION");
 
   const handleTimeUp = () => {
     // onTimeUp();
@@ -34,6 +35,7 @@ export default function CodingTimer({ minutes, onTimeUp, setPhase }) {
     <Countdown
       key={endTime}
       date={endTime}
+      autoStart={!isFrozen}
       onComplete={handleTimeUp}
       renderer={({ minutes, seconds }) => (
         <span>

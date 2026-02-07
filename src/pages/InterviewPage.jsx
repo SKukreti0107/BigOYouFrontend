@@ -7,7 +7,7 @@ import InterviewRightSidebar from "../components/InterviewRightSidebar"
 
 import { useLocation, useParams } from "react-router-dom"
 import { useState, useEffect, useCallback } from "react"
-import api from "/Users/Shubh/OneDrive/Desktop/Major Project/Frontend/bigOYou/src/components/Api"
+import api from "../components/Api"
 
 import { PYTHON_STARTER_CODE, CPP_STARTER_CODE, JAVA_STARTER_CODE } from "../components/StartedCode"
 import Notepad from "../components/notepad"
@@ -65,20 +65,29 @@ export default function InterviewPage() {
 
   const [output, setOutput] = useState("");
   const [hasRunCode, setHasRunCode] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
 
   const handleRun = async () => {
-    let res = await api.post("/execute", { language: language, code: code })
-    let agent_res = await api.post("/interview/coding", {
-      session_id: sessionId,
-      message: "I ran my code and got this output: " + res.data.output,
-      code: code,
-      language: language
-    });
-    let out = res.data;
-    setOutput(out.error ? out.error : out.output)
-    handleAddMessage(agent_res.data.response);
-    setHasRunCode(true);
+    try {
+      setIsLoading(true);
+      let res = await api.post("/execute", { language: language, code: code, session_id: sessionId })
+      let agent_res = await api.post("/interview/coding", {
+        session_id: sessionId,
+        message: "I ran my code and got this output: " + res.data.output,
+        code: code,
+        language: language
+      });
+      let out = res.data;
+      setOutput(out.error ? out.error : out.output)
+      handleAddMessage(agent_res.data.response);
+      setHasRunCode(true);
+    } catch (error) {
+      console.error("Error in handleRun:", error);
+      alert("Failed to execute code. Please check your connection.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const handleAddMessage = useCallback((text, type = "AI") => {
@@ -120,38 +129,64 @@ export default function InterviewPage() {
   }, [sessionId, handleAddMessage]);
 
   const handleStartCoding = async () => {
-    let res = await api.post("/interview/coding", {
-      session_id: sessionId,
-      message: "I'm ready to start coding.",
-      code: code,
-      language: language
-    });
-    handleAddMessage(res.data.response);
-    setPhase("CODING");
+    try {
+      setIsLoading(true);
+      let res = await api.post("/interview/coding", {
+        session_id: sessionId,
+        message: "I'm ready to start coding.",
+        code: code,
+        language: language
+      });
+      handleAddMessage(res.data.response);
+      setPhase("CODING");
+    } catch (error) {
+      console.error("Error in handleStartCoding:", error);
+      alert("Failed to transition to coding phase.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const handleDryRun = async () => {
-    let res = await api.post("/interview/review", {
-      session_id: sessionId,
-      message: "I'd like to do a dry run of my solution.",
-      code: code,
-      language: language
-    });
-    handleAddMessage(res.data.response);
-    setPhase("REVIEW");
+    try {
+      setIsLoading(true);
+      let res = await api.post("/interview/review", {
+        session_id: sessionId,
+        message: "I'd like to do a dry run of my solution.",
+        code: code,
+        language: language
+      });
+      handleAddMessage(res.data.response);
+      setPhase("REVIEW");
+    } catch (error) {
+      console.error("Error in handleDryRun:", error);
+      alert("Failed to transition to dry run phase.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const handleFeedback = async () => {
-    let res = await api.post("/interview/feedback", {
-      session_id: sessionId,
-      message: "I'm done. Please provide feedback.",
-      code: code,
-      language: language
-    });
-    if (res?.data?.response) {
-      handleAddMessage(res.data.response, "ai");
+    try {
+      setIsLoading(true);
+      console.log("Generating feedback...");
+      let res = await api.post("/interview/feedback", {
+        session_id: sessionId,
+        message: "I'm done. Please provide feedback.",
+        code: code,
+        language: language
+      });
+      console.log("Feedback response received:", res.data);
+      if (res?.data?.response) {
+        handleAddMessage(res.data.response, "ai");
+      }
+      setPhase("FEEDBACK");
+    } catch (error) {
+      console.error("Error in handleFeedback:", error);
+      alert("Failed to generate feedback. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-    setPhase("FEEDBACK");
   }
 
   const handleSendUserMessage = async (message) => {
@@ -196,6 +231,13 @@ ${message}
   return (
     <div className="bg-[#0d1117] text-slate-200 h-screen flex flex-col overflow-hidden">
       <InterviewPageNav curr_phase={phase}></InterviewPageNav>
+      {isLoading && (
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-xl font-bold">Generating AI Feedback...</p>
+          <p className="text-slate-400 mt-2">Please wait while we analyze your performance</p>
+        </div>
+      )}
       {phase != "FEEDBACK" ? (
         <main className="flex-grow flex overflow-hidden">
           <InterviewSidebar problem_deets={session.problem} onRun={handleRun} curr_phase={phase} onDryRun={handleDryRun} onEndReview={handleFeedback} hasRunCode={hasRunCode} setPhase={setPhase}></InterviewSidebar>
@@ -210,8 +252,8 @@ ${message}
           <InterviewRightSidebar session_id={sessionId} messages={messages} phase={phase} handleSendUserMessage={handleSendUserMessage} handleAddMessage={handleAddMessage}></InterviewRightSidebar>
         </main>
       ) : (
-        <main className="flex-grow flex overflow-hidden">
-          <InterviewFeedback></InterviewFeedback>
+        <main className="flex-grow flex overflow-hidden p-8 overflow-y-auto">
+          <InterviewFeedback feedback={[...messages].reverse().find(m => m.type.toLowerCase() === "ai")?.text}></InterviewFeedback>
         </main>
       )}
 
