@@ -1,6 +1,6 @@
 const PYTHON_STARTER_CODE = 
 `class Solution:
-    def solve(self) -> int:
+    def solve(self):
         # write your code here
         pass
 
