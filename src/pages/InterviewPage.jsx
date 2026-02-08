@@ -86,7 +86,8 @@ export default function InterviewPage() {
         session_id: sessionId,
         message: "I ran my code and got this output: " + out.output,
         code: code,
-        language: language
+        language: language,
+        role: "system"
       });
       handleAddMessage(agent_res.data.response);
       setHasRunCode(true);
@@ -128,7 +129,7 @@ export default function InterviewPage() {
     if (sessionStorage.getItem(didInitKey)) return;
 
     const initAgent = async () => {
-      let res = await api.post("/interview/agent_init", { session_id: sessionId });
+      let res = await api.post("/interview/agent_init", { session_id: sessionId, role: "system" });
       handleAddMessage(res.data.response);
       sessionStorage.setItem(didInitKey, "1");
     };
@@ -143,7 +144,8 @@ export default function InterviewPage() {
         session_id: sessionId,
         message: "I'm ready to start coding.",
         code: code,
-        language: language
+        language: language,
+        role: "system"
       });
       handleAddMessage(res.data.response);
       setPhase("CODING");
@@ -162,7 +164,8 @@ export default function InterviewPage() {
         session_id: sessionId,
         message: "I'd like to do a dry run of my solution.",
         code: code,
-        language: language
+        language: language,
+        role: "system"
       });
       handleAddMessage(res.data.response);
       setPhase("REVIEW");
@@ -182,7 +185,8 @@ export default function InterviewPage() {
         session_id: sessionId,
         message: "I'm done. Please provide feedback.",
         code: code,
-        language: language
+        language: language,
+        role: "system"
       });
       console.log("Feedback response received:", res.data);
       if (res?.data) {
@@ -235,6 +239,7 @@ ${message}
         message: contextWrappedMessage,
         code: code,
         language: language,
+        role: "user"
       });
 
       if (res?.data?.response) {
