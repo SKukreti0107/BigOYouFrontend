@@ -80,14 +80,14 @@ export default function InterviewPage() {
     try {
       setLoadingType('RUNNING');
       let res = await api.post("/execute", { language: language, code: code, session_id: sessionId })
+      let out = res.data;
+      setOutput(out.error ? out.error : out.output)
       let agent_res = await api.post("/interview/coding", {
         session_id: sessionId,
-        message: "I ran my code and got this output: " + res.data.output,
+        message: "I ran my code and got this output: " + out.output,
         code: code,
         language: language
       });
-      let out = res.data;
-      setOutput(out.error ? out.error : out.output)
       handleAddMessage(agent_res.data.response);
       setHasRunCode(true);
     } catch (error) {
