@@ -229,7 +229,7 @@ function Onboarding() {
       </main>
 
       <footer className="py-12 px-6 border-t border-slate-200 dark:border-slate-800 text-center">
-        <p className="text-sm text-slate-500 dark:text-slate-400">© 2024 DSAMock AI. All rights reserved.</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">© 2026 BigO(You)</p>
       </footer>
     </div>
   )

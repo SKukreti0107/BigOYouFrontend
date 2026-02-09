@@ -17,7 +17,7 @@ export default function BottomFooter(){
                                 Contact
                             </a>
                         </div>
-                        <div className="text-sm text-slate-500">© 2024 BigO(You). Built with precision for developers.</div>
+                        <div className="text-sm text-slate-500">© 2026 BigO(You).</div>
                     </div>
                 </div>
             </footer>
