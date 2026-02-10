@@ -1,16 +1,25 @@
 import { useFormik } from "formik"
 import api from "../components/Api"
-
+import BackdropLoader from "./BackdropLoader";
+import Alert from "@mui/material/Alert";
+import { useState } from "react";
 export default function SignUpForm() {
-
-    const signUp = async ({email, password}) => {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(false);
+    const signUp = async ({ email, password }) => {
         try {
-            let res =await api.post(
-                "/signUp", {email, password}
+            setLoading(true);
+            let res = await api.post(
+                "/signUp", { email, password }
             );
             console.log("created new user", (res).data);
+            setSuccess(true);
         } catch (err) {
             console.log(`error creating new user${err}`);
+            setError(err);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -22,10 +31,10 @@ export default function SignUpForm() {
         if (!values.password) {
             errors.password = 'Required';
         }
-        if(!values.confirmPassword) {
+        if (!values.confirmPassword) {
             errors.confirmPassword = 'Required';
         }
-        if(values.password != values.confirmPassword){
+        if (values.password != values.confirmPassword) {
             errors.confirmPassword = "Does not match with password";
         }
 
@@ -36,20 +45,20 @@ export default function SignUpForm() {
         initialValues: {
             email: '',
             password: '',
-            confirmPassword:'',
-        },validate,
+            confirmPassword: '',
+        }, validate,
         onSubmit: values => {
             // alert(JSON.stringify(values, null, 2));
-            signUp({email:values.email,password:values.password});
+            signUp({ email: values.email, password: values.password });
             console.log(values)
 
         },
     });
 
-    
 
 
-    return (
+
+    return (<>
         <form className="space-y-5" onSubmit={formik.handleSubmit}>
             <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Email Address</label>
@@ -108,5 +117,12 @@ export default function SignUpForm() {
                 <span className="material-symbols-outlined">login</span>
             </button>
         </form>
+        {loading && <BackdropLoader />}
+        <div className="mt-4">
+            {error && <Alert severity="error">{error.message}</Alert>}
+            {success && <Alert severity="success">User created successfully.Proceed to Sign In</Alert>}
+        </div>
+
+    </>
     )
 }
