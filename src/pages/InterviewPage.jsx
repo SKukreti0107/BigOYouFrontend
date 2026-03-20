@@ -4,13 +4,13 @@ import TerminalOutput from "../components/TerminalOutpur"
 import InterviewPageNav from "../components/InterviewPageNav"
 import InterviewFeedback from "../components/InterviewFeedback"
 import InterviewRightSidebar from "../components/InterviewRightSidebar"
-
+import Notepad from "../components/notepad"
 import { useLocation, useParams } from "react-router-dom"
 import { useState, useEffect, useCallback } from "react"
 import api from "../components/Api"
 
 import { PYTHON_STARTER_CODE, CPP_STARTER_CODE, JAVA_STARTER_CODE } from "../components/StartedCode"
-import Notepad from "../components/Notepad"
+
 
 
 
@@ -22,6 +22,7 @@ const getStarterCode = (language) => {
 
 export default function InterviewPage() {
   const { sessionId } = useParams();
+  const VALID_PHASES = new Set(["PROBLEM_DISCUSSION", "CODING", "REVIEW", "FEEDBACK"]);
   const PHASE_KEY = `interview.phase.${sessionId}`
   const [phase, setPhase] = useState(() => {
     return sessionStorage.getItem(PHASE_KEY) ?? "PROBLEM_DISCUSSION";
@@ -39,6 +40,27 @@ export default function InterviewPage() {
 
   const { state } = useLocation();
   const [session, setSession] = useState(state?.session_deets ?? null);
+
+  useEffect(() => {
+    const loadSessionOverview = async () => {
+      try {
+        const res = await api.get("/interview/session", {
+          params: { session_id: sessionId },
+        });
+
+        // Backend overview is the source of truth for current session/problem.
+        if (res?.data) {
+          setSession((prev) => ({ ...(prev ?? {}), ...res.data }));
+        }
+      } catch (error) {
+        console.error("Failed to load session overview:", error);
+      }
+    };
+
+    if (sessionId) {
+      loadSessionOverview();
+    }
+  }, [sessionId]);
 
   const [code, setCode] = useState(() => {
     return sessionStorage.getItem(STORAGE_KEY) ?? getStarterCode(language);
@@ -75,6 +97,20 @@ export default function InterviewPage() {
   const [hasRunCode, setHasRunCode] = useState(false);
   const [loadingType, setLoadingType] = useState(null); // 'RUNNING', 'STARTING', 'DRY_RUN', 'FEEDBACK', 'APPROACH_REVIEW', 'MESSAGE'
 
+  const syncFromAgentResponse = useCallback((data) => {
+    if (!data) return;
+
+    if (data.phase && VALID_PHASES.has(data.phase)) {
+      setPhase(data.phase);
+    }
+
+    if (data.feedback) {
+      const payload = { ...data, feedback: data.feedback };
+      setFeedbackData(payload);
+      sessionStorage.setItem(FEEDBACK_KEY, JSON.stringify(payload));
+    }
+  }, [FEEDBACK_KEY]);
+
 
   const handleRun = async () => {
     try {
@@ -90,6 +126,7 @@ export default function InterviewPage() {
         role: "system"
       });
       handleAddMessage(agent_res.data.response);
+      syncFromAgentResponse(agent_res?.data);
       setHasRunCode(true);
     } catch (error) {
       console.error("Error in handleRun:", error);
@@ -131,11 +168,12 @@ export default function InterviewPage() {
     const initAgent = async () => {
       let res = await api.post("/interview/agent_init", { session_id: sessionId, role: "system" });
       handleAddMessage(res.data.response);
+      syncFromAgentResponse(res?.data);
       sessionStorage.setItem(didInitKey, "1");
     };
 
     initAgent();
-  }, [sessionId, handleAddMessage]);
+  }, [sessionId, handleAddMessage, syncFromAgentResponse]);
 
   const handleStartCoding = async () => {
     try {
@@ -148,7 +186,7 @@ export default function InterviewPage() {
         role: "system"
       });
       handleAddMessage(res.data.response);
-      setPhase("CODING");
+      syncFromAgentResponse(res?.data);
     } catch (error) {
       console.error("Error in handleStartCoding:", error);
       alert("Failed to transition to coding phase.");
@@ -168,7 +206,7 @@ export default function InterviewPage() {
         role: "system"
       });
       handleAddMessage(res.data.response);
-      setPhase("REVIEW");
+      syncFromAgentResponse(res?.data);
     } catch (error) {
       console.error("Error in handleDryRun:", error);
       alert("Failed to transition to dry run phase.");
@@ -189,14 +227,10 @@ export default function InterviewPage() {
         role: "system"
       });
       console.log("Feedback response received:", res.data);
-      if (res?.data) {
-        setFeedbackData(res.data);
-        sessionStorage.setItem(FEEDBACK_KEY, JSON.stringify(res.data));
-      }
       if (res?.data?.response) {
         handleAddMessage(res.data.response, "ai");
       }
-      setPhase("FEEDBACK");
+      syncFromAgentResponse(res?.data);
     } catch (error) {
       console.error("Error in handleFeedback:", error);
       alert("Failed to generate feedback. Please try again.");
@@ -245,6 +279,7 @@ ${message}
       if (res?.data?.response) {
         handleAddMessage(res.data.response, "ai");
       }
+      syncFromAgentResponse(res?.data);
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
@@ -264,10 +299,10 @@ ${message}
       )}
       {phase != "FEEDBACK" ? (
         <main className="flex-grow flex overflow-hidden">
-          <InterviewSidebar problem_deets={session.problem} onRun={handleRun} curr_phase={phase} onDryRun={handleDryRun} onEndReview={handleFeedback} hasRunCode={hasRunCode} setPhase={setPhase} loadingType={loadingType}></InterviewSidebar>
+          <InterviewSidebar problem_deets={session?.problem} onRun={handleRun} curr_phase={phase} onDryRun={handleDryRun} onEndReview={handleFeedback} hasRunCode={hasRunCode} loadingType={loadingType}></InterviewSidebar>
 
-          <div className="flex-grow flex flex-col">
-            {(phase == "PROBLEM_DISCUSSION") ? <Notepad session_id={sessionId} onStartCoding={handleStartCoding} onSetMessage={handleAddMessage} curr_phase={phase} loadingType={loadingType} setLoadingType={setLoadingType}></Notepad> : (<><CodeEditor code={code} onChange={setCode} language={language} setLanguage={handleLanguageChange} curr_phase={phase}></CodeEditor>
+          <div className="flex-grow flex flex-col min-h-0">
+            {(phase == "PROBLEM_DISCUSSION") ? <Notepad session_id={sessionId} onStartCoding={handleStartCoding} onSetMessage={handleAddMessage} onAgentResponse={syncFromAgentResponse} curr_phase={phase} loadingType={loadingType} setLoadingType={setLoadingType}></Notepad> : (<><CodeEditor code={code} onChange={setCode} language={language} setLanguage={handleLanguageChange} curr_phase={phase}></CodeEditor>
               <TerminalOutput output={output}></TerminalOutput></>
             )
             }

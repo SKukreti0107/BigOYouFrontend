@@ -3,14 +3,15 @@ import api from "./Api";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-export default function CodingTimer({ minutes, onTimeUp, setPhase,curr_phase }) {
+export default function CodingTimer({ minutes, onTimeUp, curr_phase }) {
   const { sessionId } = useParams();
   const [remainingTime, setRemainingTime] = useState(minutes * 60);
   const [isFrozen, setIsFrozen] = useState(curr_phase!="CODING"&&curr_phase!="PROBLEM_DISCUSSION");
 
   const handleTimeUp = () => {
-    // onTimeUp();
-    setPhase("REVIEW");
+    if (typeof onTimeUp === "function") {
+      onTimeUp();
+    }
   }
 
   useEffect(() => {

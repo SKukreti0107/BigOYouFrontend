@@ -11,14 +11,14 @@ const ButtonSpinner = () => (
   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
 );
 
-export default function InterviewSidebar({ problem_deets = demo, onRun, curr_phase, onDryRun, onEndReview, hasRunCode = false, setPhase, loadingType }) {
+export default function InterviewSidebar({ problem_deets = demo, onRun, curr_phase, onDryRun, onEndReview, hasRunCode = false, loadingType }) {
 
   return (
     <section className="w-[450px] flex flex-col border-r border-border-dark bg-panel-dark overflow-hidden">
       <div className="p-4 border-b border-border-dark flex items-center justify-between bg-background-dark/50">
         <div className="flex items-center gap-2 text-primary">
           <span className="material-symbols-outlined text-xl">timer</span>
-          <span className="font-mono text-lg font-bold"><CodingTimer minutes={problem_deets.expected_time} setPhase={setPhase} curr_phase={curr_phase}></CodingTimer></span>
+          <span className="font-mono text-lg font-bold"><CodingTimer minutes={problem_deets.expected_time} onTimeUp={onDryRun} curr_phase={curr_phase}></CodingTimer></span>
         </div>
       </div>
       <div className="flex-grow overflow-y-auto p-6 custom-scrollbar">

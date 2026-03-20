@@ -20,7 +20,7 @@ export default function Sidebar(){
                                 <span className="material-symbols-outlined text-[20px]">dashboard</span>
                                 <span className="text-sm font-medium">Dashboard</span>
                             </Link>
-                            <Link to={"/"} className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors cursor-pointer ${isActive("/history")? "text-[#137fec] bg-[#137fec]/10 border border-[#137fec]/20" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}>
+                            <Link to={"/history"} className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors cursor-pointer ${isActive("/history")? "text-[#137fec] bg-[#137fec]/10 border border-[#137fec]/20" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}>
                                 <span className="material-symbols-outlined text-[20px]">history</span>
                                 <span className="text-sm font-medium">History</span>
                             </Link>

@@ -49,7 +49,7 @@ function App() {
       <Route path="/login" element={<Login checkAuth={checkAuth} />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/interviewPage/:sessionId" element={<ProtectedRoute isUser={isUser}> <InterviewPage /></ProtectedRoute> } />
-      <Route path="/history" element={<History />} />
+      <Route path="/history" element={<History setIsUser={setIsUser} />} />
       <Route path="*" element={<Navigate to="/" replace />} />
       <Route path='/dashboard' element={
         <ProtectedRoute isUser={isUser}><Dashboard setIsUser={setIsUser}></Dashboard></ProtectedRoute>
