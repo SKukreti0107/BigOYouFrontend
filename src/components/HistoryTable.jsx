@@ -27,11 +27,11 @@ const columns = [
         headerName: 'Score',
         width: 200,
         renderCell: (params) => (
-            <div style={{ width: '90%', display: 'flex', alignItems: 'center', height: '100%' }}>
-                <div style={{ width: '100%' }}>
-                    <ScoreBar value={params.value} />
-                    <p className='text-xs text-slate-400'>{params.value}/100</p>
+            <div className="w-[90%] flex flex-col justify-center h-full gap-2">
+                <div className="flex justify-between items-center text-xs">
+                    <span className="font-semibold text-slate-200">{params.value}/100</span>
                 </div>
+                <ScoreBar value={params.value} />
             </div>
         ),
     },
@@ -47,9 +47,12 @@ const columns = [
         headerName: 'Action',
         width: 300,
         renderCell: () => (
-            <button className="px-4 py-1.5 rounded-lg bg-[#137fec] hover:bg-[#137fec]/90 text-white text-xs font-bold transition-all cursor-pointer">
-                {'View detailed summary '}
-            </button>
+            <div className="flex h-full w-full items-center">
+                <button className="flex items-center gap-1.5 px-3 rounded-lg border border-[#30363d] bg-[#21262d] hover:bg-[#30363d] hover:border-slate-500 text-slate-300 hover:text-white text-[11px] font-semibold tracking-wide uppercase transition-all cursor-pointer group">
+                    View Summary
+                    <span className="material-symbols-outlined text-[14px] text-slate-400 group-hover:text-white transition-colors">arrow_forward</span>
+                </button>
+            </div>
         ),
     },
 ];
@@ -68,11 +71,14 @@ const rows = [
 
 export default function HistoryTable() {
     return (
-        <div className='m-4'>
+        <div className='w-full'>
             <Box sx={{
                 height: 550,
                 width: '100%',
                 backgroundColor: "#161b22",
+                borderRadius: '1rem',
+                overflow: 'hidden',
+                border: '1px solid #30363d'
             }}>
                 <DataGrid
                     rows={rows}
@@ -85,7 +91,7 @@ export default function HistoryTable() {
                     sx={{
                         backgroundColor: "#161b22",
                         color: "#c9d1d9",
-                        border: "1px solid #30363d",
+                        border: "none",
                         outline: 'none',
                         '--DataGrid-rowBorderColor': 'transparent',
                         '& .MuiDataGrid-main': {

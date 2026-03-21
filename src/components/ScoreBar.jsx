@@ -1,29 +1,16 @@
-import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
-import { styled } from '@mui/material/styles';
-const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
-    height: 10,
-    borderRadius: 5,
-    [`&.${linearProgressClasses.colorPrimary}`]: {
-        backgroundColor: theme.palette.grey[200],
-        ...theme.applyStyles('dark', {
-            backgroundColor: theme.palette.grey[800],
-        }),
-    },
-    [`& .${linearProgressClasses.bar}`]: {
-        borderRadius: 5,
-        backgroundColor: '#1a90ff',
-        ...theme.applyStyles('dark', {
-            backgroundColor: '#308fe8',
-        }),
-    },
-}));
-
-
 export default function ScoreBar({ value }) {
+    const getTrackColor = (v) => {
+        if (v >= 80) return 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.3)]';
+        if (v >= 50) return 'bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.3)]';
+        return 'bg-red-400 shadow-[0_0_12px_rgba(248,113,113,0.3)]';
+    };
 
     return (
-        <div>
-            <BorderLinearProgress variant="determinate" value={value} />
+        <div className="w-full h-1.5 bg-[#0d1117]/80 ring-1 ring-[#30363d] rounded-full overflow-hidden">
+            <div 
+                className={`h-full ${getTrackColor(value)} rounded-full`}
+                style={{ width: `${value}%`, transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)' }}
+            />
         </div>
     )
-}
+}

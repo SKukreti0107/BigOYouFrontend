@@ -7,6 +7,7 @@ import InterviewPage from './pages/InterviewPage.jsx'
 import History from './pages/History.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Practice from './pages/Practice.jsx'
+import Settings from './pages/Settings.jsx'
 import api from "./components/Api.jsx"
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import BackdropLoader from './components/BackdropLoader.jsx'
@@ -56,6 +57,9 @@ function App() {
       } />
       <Route path='/practice' element={<ProtectedRoute isUser={isUser}>
         <Practice />
+      </ProtectedRoute>}></Route>
+      <Route path='/settings' element={<ProtectedRoute isUser={isUser}>
+        <Settings isUser={isUser} />
       </ProtectedRoute>}></Route>
       {/* <Route path="/feedback" element={<InterviewFeedback></InterviewFeedback> } /> */}
     </Routes>

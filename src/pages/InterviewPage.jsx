@@ -6,7 +6,7 @@ import InterviewFeedback from "../components/InterviewFeedback"
 import InterviewRightSidebar from "../components/InterviewRightSidebar"
 import Notepad from "../components/notepad"
 import { useLocation, useParams } from "react-router-dom"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import api from "../components/Api"
 
 import { PYTHON_STARTER_CODE, CPP_STARTER_CODE, JAVA_STARTER_CODE } from "../components/StartedCode"
@@ -21,6 +21,34 @@ const getStarterCode = (language) => {
 };
 
 export default function InterviewPage() {
+  // ── Fullscreen lock ──
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const fullscreenRequested = useRef(false);
+
+  useEffect(() => {
+    const enterFullscreen = async () => {
+      if (fullscreenRequested.current) return;
+      fullscreenRequested.current = true;
+      try {
+        await document.documentElement.requestFullscreen();
+      } catch (err) {
+        console.warn("Fullscreen request denied:", err);
+      }
+    };
+    enterFullscreen();
+
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFsChange);
+    onFsChange();
+
+    return () => {
+      document.removeEventListener("fullscreenchange", onFsChange);
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+    };
+  }, []);
+
   const { sessionId } = useParams();
   const VALID_PHASES = new Set(["PROBLEM_DISCUSSION", "CODING", "REVIEW", "FEEDBACK"]);
   const PHASE_KEY = `interview.phase.${sessionId}`
@@ -51,6 +79,10 @@ export default function InterviewPage() {
         // Backend overview is the source of truth for current session/problem.
         if (res?.data) {
           setSession((prev) => ({ ...(prev ?? {}), ...res.data }));
+          // Restore phase from backend on refresh
+          if (res.data.phase) {
+            setPhase(res.data.phase);
+          }
         }
       } catch (error) {
         console.error("Failed to load session overview:", error);
@@ -96,6 +128,28 @@ export default function InterviewPage() {
   const [output, setOutput] = useState("");
   const [hasRunCode, setHasRunCode] = useState(false);
   const [loadingType, setLoadingType] = useState(null); // 'RUNNING', 'STARTING', 'DRY_RUN', 'FEEDBACK', 'APPROACH_REVIEW', 'MESSAGE'
+  const TIMEOUT_STATE_KEY = `interview.timeout_state.${sessionId}`;
+  const TIMEOUT_ACTION_KEY = `interview.timeout_action.${sessionId}`;
+
+  const [timeoutModalOpen, setTimeoutModalOpen] = useState(false);
+  const [timeoutState, setTimeoutState] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem(TIMEOUT_STATE_KEY);
+      return stored ? JSON.parse(stored) : {
+        timeExpired: false,
+        extraTimeUsed: false,
+        extensionCount: 0,
+        maxExtensions: 1,
+        extensionSeconds: 0,
+      };
+    } catch { return {
+      timeExpired: false,
+      extraTimeUsed: false,
+      extensionCount: 0,
+      maxExtensions: 1,
+      extensionSeconds: 0,
+    }; }
+  });
 
   const syncFromAgentResponse = useCallback((data) => {
     if (!data) return;
@@ -142,18 +196,20 @@ export default function InterviewPage() {
 
   useEffect(() => {
     const loadSessionMessages = async () => {
-      const res = await api.get("/interview/session/messages", {
-        params: { session_id: sessionId },
-      });
-      const data = res.data;
-      const restored = Array.isArray(data) ? data : (data?.messages ?? []);
-      if (restored.length) {
-        console.log(restored)
-        const formattedMessages = restored.map((msg) => ({
-          type: msg.role === "user" ? "user" : (msg.role === "ai" ? "ai" : "AI"),
-          text: msg.content
-        }));
-        setMessages((prev) => [...prev, ...formattedMessages]);
+      try {
+        const res = await api.get("/interview/agent_messages", {
+          params: { session_id: sessionId },
+        });
+        const restored = Array.isArray(res.data) ? res.data : [];
+        if (restored.length) {
+          const formattedMessages = restored.map((msg) => ({
+            type: msg.role === "user" ? "user" : "ai",
+            text: msg.content
+          }));
+          setMessages(formattedMessages);
+        }
+      } catch (error) {
+        console.error("Failed to load agent messages:", error);
       }
     };
 
@@ -224,7 +280,11 @@ export default function InterviewPage() {
         message: "I'm done. Please provide feedback.",
         code: code,
         language: language,
-        role: "system"
+        role: "system",
+        time_expired: timeoutState.timeExpired,
+        extra_time_used: timeoutState.extraTimeUsed,
+        extension_count: timeoutState.extensionCount,
+        session_ended_by: timeoutState.timeExpired ? "TIMEOUT_END" : "NORMAL",
       });
       console.log("Feedback response received:", res.data);
       if (res?.data?.response) {
@@ -234,6 +294,88 @@ export default function InterviewPage() {
     } catch (error) {
       console.error("Error in handleFeedback:", error);
       alert("Failed to generate feedback. Please try again.");
+    } finally {
+      setLoadingType(null);
+    }
+  }
+
+  // Persist timeoutState changes to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem(TIMEOUT_STATE_KEY, JSON.stringify(timeoutState));
+  }, [TIMEOUT_STATE_KEY, timeoutState]);
+
+  const handleTimeout = () => {
+    // If the user already took a timeout action, don't re-show the modal
+    const existingAction = sessionStorage.getItem(TIMEOUT_ACTION_KEY);
+    if (existingAction) return;
+
+    setTimeoutState((prev) => ({ ...prev, timeExpired: true }));
+    setTimeoutModalOpen(true);
+  }
+
+  const handleTimeoutEndFeedback = async () => {
+    try {
+      setLoadingType('FEEDBACK');
+
+      await api.post("/interview/timeout_action", {
+        session_id: sessionId,
+        action: "END_FEEDBACK",
+      });
+
+      sessionStorage.setItem(TIMEOUT_ACTION_KEY, "END_FEEDBACK");
+
+      let res = await api.post("/interview/feedback", {
+        session_id: sessionId,
+        message: "[SYSTEM EVENT] Time is up. Generate final feedback based on performance so far.",
+        code: code,
+        language: language,
+        role: "system",
+        time_expired: true,
+        extra_time_used: timeoutState.extraTimeUsed,
+        extension_count: timeoutState.extensionCount,
+        session_ended_by: "TIMEOUT_END",
+      });
+
+      if (res?.data?.response) {
+        handleAddMessage(res.data.response, "ai");
+      }
+      syncFromAgentResponse(res?.data);
+      setTimeoutModalOpen(false);
+    } catch (error) {
+      console.error("Error handling timeout feedback:", error);
+      alert("Failed to generate feedback after timeout.");
+    } finally {
+      setLoadingType(null);
+    }
+  }
+
+  const handleTimeoutExtend = async () => {
+    try {
+      setLoadingType('MESSAGE');
+      const res = await api.post("/interview/timeout_action", {
+        session_id: sessionId,
+        action: "EXTEND",
+        extension_minutes: 15,
+      });
+
+      const extSeconds = res?.data?.extension_seconds || 0;
+
+      // Clear action key so the modal can re-appear when the new 15-min timer expires
+      sessionStorage.removeItem(TIMEOUT_ACTION_KEY);
+
+      setTimeoutState((prev) => ({
+        ...prev,
+        timeExpired: false,
+        extraTimeUsed: true,
+        extensionCount: res?.data?.extension_count ?? prev.extensionCount + 1,
+        maxExtensions: res?.data?.max_extensions ?? prev.maxExtensions,
+        extensionSeconds: prev.extensionSeconds + extSeconds,
+      }));
+      setTimeoutModalOpen(false);
+      handleAddMessage("[SYSTEM] Extra time granted: +15 minutes. Continue from where you left off.", "AI");
+    } catch (error) {
+      console.error("Error requesting extension:", error);
+      alert(error?.response?.data?.detail || "Extension request failed.");
     } finally {
       setLoadingType(null);
     }
@@ -273,7 +415,11 @@ ${message}
         message: contextWrappedMessage,
         code: code,
         language: language,
-        role: "user"
+        role: "user",
+        time_expired: timeoutState.timeExpired,
+        extra_time_used: timeoutState.extraTimeUsed,
+        extension_count: timeoutState.extensionCount,
+        session_ended_by: "NORMAL",
       });
 
       if (res?.data?.response) {
@@ -288,7 +434,23 @@ ${message}
   }
 
   return (
-    <div className="bg-[#0d1117] text-slate-200 h-screen flex flex-col overflow-hidden">
+    <div className="bg-[#0d1117] text-slate-200 h-screen flex flex-col overflow-hidden relative">
+      {/* Fullscreen exit overlay */}
+      {!isFullscreen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex flex-col items-center justify-center">
+          <span className="material-symbols-outlined text-6xl text-amber-500 mb-4">fullscreen</span>
+          <h2 className="text-2xl font-bold text-white mb-2">Fullscreen Required</h2>
+          <p className="text-slate-400 mb-6 text-center max-w-md">
+            Please stay in fullscreen mode during your interview to maintain focus.
+          </p>
+          <button
+            onClick={() => document.documentElement.requestFullscreen().catch(() => {})}
+            className="px-8 py-3 bg-[#137fec] hover:bg-[#137fec]/90 text-white font-bold rounded-xl shadow-lg shadow-[#137fec]/20 transition-all"
+          >
+            Re-enter Fullscreen
+          </button>
+        </div>
+      )}
       <InterviewPageNav curr_phase={phase}></InterviewPageNav>
       {loadingType === 'FEEDBACK' && (
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
@@ -297,9 +459,38 @@ ${message}
           <p className="text-slate-400 mt-2">Please wait while we analyze your performance</p>
         </div>
       )}
+      {timeoutModalOpen ? (
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center px-4">
+          <div className="w-full max-w-xl rounded-xl border border-border-dark bg-[#111827] p-6">
+            <h3 className="text-xl font-bold text-white mb-2">Time is up</h3>
+            <p className="text-slate-300 mb-6">Choose how you want to proceed:</p>
+            <div className="grid gap-3">
+              <button
+                type="button"
+                disabled={loadingType !== null}
+                onClick={handleTimeoutEndFeedback}
+                className="w-full rounded bg-indigo-600 px-4 py-3 font-semibold text-white hover:bg-indigo-500 disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {loadingType === 'FEEDBACK' && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
+                {loadingType === 'FEEDBACK' ? 'Generating feedback...' : 'End and generate feedback'}
+              </button>
+              <button
+                type="button"
+                disabled={loadingType !== null || timeoutState.extensionCount >= timeoutState.maxExtensions}
+                onClick={handleTimeoutExtend}
+                className="w-full rounded bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-500 disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {loadingType === 'MESSAGE' && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
+                {loadingType === 'MESSAGE' ? 'Granting extra time...' : `Request +15 min extension (${timeoutState.extensionCount}/${timeoutState.maxExtensions} used)`}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {phase != "FEEDBACK" ? (
         <main className="flex-grow flex overflow-hidden">
-          <InterviewSidebar problem_deets={session?.problem} onRun={handleRun} curr_phase={phase} onDryRun={handleDryRun} onEndReview={handleFeedback} hasRunCode={hasRunCode} loadingType={loadingType}></InterviewSidebar>
+          <InterviewSidebar problem_deets={session?.problem} onRun={handleRun} curr_phase={phase} onDryRun={handleDryRun} onEndReview={handleFeedback} onTimeout={handleTimeout} extensionSeconds={timeoutState.extensionSeconds} hasRunCode={hasRunCode} loadingType={loadingType}></InterviewSidebar>
 
           <div className="flex-grow flex flex-col min-h-0">
             {(phase == "PROBLEM_DISCUSSION") ? <Notepad session_id={sessionId} onStartCoding={handleStartCoding} onSetMessage={handleAddMessage} onAgentResponse={syncFromAgentResponse} curr_phase={phase} loadingType={loadingType} setLoadingType={setLoadingType}></Notepad> : (<><CodeEditor code={code} onChange={setCode} language={language} setLanguage={handleLanguageChange} curr_phase={phase}></CodeEditor>

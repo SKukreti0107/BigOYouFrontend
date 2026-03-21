@@ -11,14 +11,14 @@ const ButtonSpinner = () => (
   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
 );
 
-export default function InterviewSidebar({ problem_deets = demo, onRun, curr_phase, onDryRun, onEndReview, hasRunCode = false, loadingType }) {
+export default function InterviewSidebar({ problem_deets = demo, onRun, curr_phase, onDryRun, onEndReview, onTimeout, extensionSeconds = 0, hasRunCode = false, loadingType }) {
 
   return (
     <section className="w-[450px] flex flex-col border-r border-border-dark bg-panel-dark overflow-hidden">
       <div className="p-4 border-b border-border-dark flex items-center justify-between bg-background-dark/50">
         <div className="flex items-center gap-2 text-primary">
           <span className="material-symbols-outlined text-xl">timer</span>
-          <span className="font-mono text-lg font-bold"><CodingTimer minutes={problem_deets.expected_time} onTimeUp={onDryRun} curr_phase={curr_phase}></CodingTimer></span>
+          <span className="font-mono text-lg font-bold"><CodingTimer onTimeUp={onTimeout} curr_phase={curr_phase} extensionSeconds={extensionSeconds}></CodingTimer></span>
         </div>
       </div>
       <div className="flex-grow overflow-y-auto p-6 custom-scrollbar">
@@ -50,7 +50,7 @@ export default function InterviewSidebar({ problem_deets = demo, onRun, curr_pha
               {loadingType === 'RUNNING' ? <ButtonSpinner /> : <span className="material-symbols-outlined text-sm">play_arrow</span>}
               {loadingType === 'RUNNING' ? "Running..." : "Run Code"}
             </button>
-            {(curr_phase == "REVIEW") ? (
+            {/* {(curr_phase == "REVIEW") ? (
               <button
                 onClick={onEndReview}
                 disabled={loadingType !== null}
@@ -69,7 +69,8 @@ export default function InterviewSidebar({ problem_deets = demo, onRun, curr_pha
                 {loadingType === 'DRY_RUN' ? <ButtonSpinner /> : <span className="material-symbols-outlined text-sm">play_arrow</span>}
                 {loadingType === 'DRY_RUN' ? "Proceeding..." : "Proceed to Dry Run"}
               </button>
-            )}
+              
+            )} */}
           </>
         )}
 
