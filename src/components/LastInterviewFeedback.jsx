@@ -20,14 +20,14 @@ export default function LastInterviewFeedback({ positive=["Excellent approach ex
                 {positive.map((item, idx) => (
                     <li key={`pos-${idx}`} className="flex items-start gap-3">
                         <span className="material-symbols-outlined text-emerald-500 text-sm mt-0.5 shrink-0">check_circle</span>
-                        <span className="text-xs text-slate-300 leading-relaxed font-medium">{item}</span>
+                        <span className="text-xs text-slate-300 leading-relaxed font-medium">{item['title']}</span>
                     </li>
                 ))}
                 
                 {negative.map((item, idx) => (
                     <li key={`neg-${idx}`} className="flex items-start gap-3">
                         <span className="material-symbols-outlined text-amber-500 text-sm mt-0.5 shrink-0">warning</span>
-                        <span className="text-xs text-slate-300 leading-relaxed font-medium">{item}</span>
+                        <span className="text-xs text-slate-300 leading-relaxed font-medium">{item['title']}</span>
                     </li>
                 ))}
             </ul>

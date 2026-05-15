@@ -5,6 +5,7 @@ import Login from './pages/Login.jsx'
 import Onboarding from './pages/Onboarding.jsx'
 import InterviewPage from './pages/InterviewPage.jsx'
 import History from './pages/History.jsx'
+import SessionDetails from './pages/SessionDetails.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Practice from './pages/Practice.jsx'
 import Settings from './pages/Settings.jsx'
@@ -50,10 +51,11 @@ function App() {
       <Route path="/login" element={<Login checkAuth={checkAuth} />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/interviewPage/:sessionId" element={<ProtectedRoute isUser={isUser}> <InterviewPage /></ProtectedRoute> } />
-      <Route path="/history" element={<History setIsUser={setIsUser} />} />
+      <Route path="/history" element={<History setIsUser={setIsUser} isUser={isUser} />} />
+      <Route path="/history/session/:sessionId" element={<ProtectedRoute isUser={isUser}><SessionDetails /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
       <Route path='/dashboard' element={
-        <ProtectedRoute isUser={isUser}><Dashboard setIsUser={setIsUser}></Dashboard></ProtectedRoute>
+        <ProtectedRoute isUser={isUser}><Dashboard setIsUser={setIsUser} isUser={isUser}></Dashboard></ProtectedRoute>
       } />
       <Route path='/practice' element={<ProtectedRoute isUser={isUser}>
         <Practice />

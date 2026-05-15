@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from './Api';
+import { getInterviewErrorMessage } from './interviewErrors';
 
 export default function ProblemAccordion({ topic_deets }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -9,10 +10,15 @@ export default function ProblemAccordion({ topic_deets }) {
     const progressPercentage = topic_deets.total > 0 ? (topic_deets.completed / topic_deets.total) * 100 : 0;
 
     const startInterview = async () => {
-        const res = await api.post(`/interview/start?topic=${encodeURIComponent(topic_deets.topic)}`);
-        let session_deets = res.data;
-        console.log(session_deets);
-        navigate(`/interviewPage/${session_deets.session_id}`, { state: { session_deets } });
+        try {
+            const res = await api.post(`/interview/start?topic=${encodeURIComponent(topic_deets.topic)}`);
+            let session_deets = res.data;
+            console.log(session_deets);
+            navigate(`/interviewPage/${session_deets.session_id}`, { state: { session_deets } });
+        } catch (error) {
+            console.error("Failed to start topic interview", error);
+            alert(getInterviewErrorMessage(error, "starting an interview"));
+        }
     };
 
     return (

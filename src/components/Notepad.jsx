@@ -1,5 +1,6 @@
 import api from "./Api";
 import { useState, useEffect } from "react";
+import { getInterviewErrorMessage } from "./interviewErrors";
 
 const ButtonSpinner = () => (
   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -25,6 +26,7 @@ export default function Notepad({ session_id, onStartCoding, onSetMessage, onAge
       onAgentResponse?.(res?.data)
     } catch (error) {
       console.error("Error reviewing approach:", error);
+      alert(getInterviewErrorMessage(error, "reviewing your approach"));
     } finally {
       setLoadingType(null);
     }

@@ -2,6 +2,7 @@ import Countdown from "react-countdown";
 import api from "./Api";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { getInterviewErrorMessage } from "./interviewErrors";
 
 export default function CodingTimer({ onTimeUp, curr_phase, extensionSeconds = 0 }) {
   const { sessionId } = useParams();
@@ -32,6 +33,7 @@ export default function CodingTimer({ onTimeUp, curr_phase, extensionSeconds = 0
         }
       } catch (err) {
         console.error("Error fetching timer:", err);
+        alert(getInterviewErrorMessage(err, "loading interview timer"));
       }
     };
     if (sessionId) fetchTimer();

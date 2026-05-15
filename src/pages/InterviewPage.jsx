@@ -4,10 +4,11 @@ import TerminalOutput from "../components/TerminalOutpur"
 import InterviewPageNav from "../components/InterviewPageNav"
 import InterviewFeedback from "../components/InterviewFeedback"
 import InterviewRightSidebar from "../components/InterviewRightSidebar"
-import Notepad from "../components/notepad"
+import Notepad from "../components/Notepad"
 import { useLocation, useParams } from "react-router-dom"
 import { useState, useEffect, useCallback, useRef } from "react"
 import api from "../components/Api"
+import { getInterviewErrorMessage } from "../components/interviewErrors"
 
 import { PYTHON_STARTER_CODE, CPP_STARTER_CODE, JAVA_STARTER_CODE } from "../components/StartedCode"
 
@@ -20,10 +21,18 @@ const getStarterCode = (language) => {
   return JAVA_STARTER_CODE;
 };
 
+
+
 export default function InterviewPage() {
   // ── Fullscreen lock ──
   const [isFullscreen, setIsFullscreen] = useState(false);
   const fullscreenRequested = useRef(false);
+
+  const showError = useCallback((error, context) => {
+    const message = getInterviewErrorMessage(error, context);
+    setUiError(message);
+    console.error(`Interview error (${context}):`, error);
+  }, []);
 
   useEffect(() => {
     const enterFullscreen = async () => {
@@ -85,14 +94,14 @@ export default function InterviewPage() {
           }
         }
       } catch (error) {
-        console.error("Failed to load session overview:", error);
+        showError(error, "loading session details");
       }
     };
 
     if (sessionId) {
       loadSessionOverview();
     }
-  }, [sessionId]);
+  }, [sessionId, showError]);
 
   const [code, setCode] = useState(() => {
     return sessionStorage.getItem(STORAGE_KEY) ?? getStarterCode(language);
@@ -127,6 +136,7 @@ export default function InterviewPage() {
 
   const [output, setOutput] = useState("");
   const [hasRunCode, setHasRunCode] = useState(false);
+  const [uiError, setUiError] = useState("");
   const [loadingType, setLoadingType] = useState(null); // 'RUNNING', 'STARTING', 'DRY_RUN', 'FEEDBACK', 'APPROACH_REVIEW', 'MESSAGE'
   const TIMEOUT_STATE_KEY = `interview.timeout_state.${sessionId}`;
   const TIMEOUT_ACTION_KEY = `interview.timeout_action.${sessionId}`;
@@ -165,6 +175,8 @@ export default function InterviewPage() {
     }
   }, [FEEDBACK_KEY]);
 
+  
+
 
   const handleRun = async () => {
     try {
@@ -183,8 +195,7 @@ export default function InterviewPage() {
       syncFromAgentResponse(agent_res?.data);
       setHasRunCode(true);
     } catch (error) {
-      console.error("Error in handleRun:", error);
-      alert("Failed to execute code. Please check your connection.");
+      showError(error, "running code");
     } finally {
       setLoadingType(null);
     }
@@ -209,12 +220,12 @@ export default function InterviewPage() {
           setMessages(formattedMessages);
         }
       } catch (error) {
-        console.error("Failed to load agent messages:", error);
+        showError(error, "loading interview messages");
       }
     };
 
     loadSessionMessages();
-  }, [sessionId]);
+  }, [sessionId, showError]);
 
   useEffect(() => {
     const didInitKey = `interview.agent_init.${sessionId}`;
@@ -222,14 +233,18 @@ export default function InterviewPage() {
     if (sessionStorage.getItem(didInitKey)) return;
 
     const initAgent = async () => {
-      let res = await api.post("/interview/agent_init", { session_id: sessionId, role: "system" });
-      handleAddMessage(res.data.response);
-      syncFromAgentResponse(res?.data);
-      sessionStorage.setItem(didInitKey, "1");
+      try {
+        let res = await api.post("/interview/agent_init", { session_id: sessionId, role: "system" });
+        handleAddMessage(res.data.response);
+        syncFromAgentResponse(res?.data);
+        sessionStorage.setItem(didInitKey, "1");
+      } catch (error) {
+        showError(error, "starting AI interviewer");
+      }
     };
 
     initAgent();
-  }, [sessionId, handleAddMessage, syncFromAgentResponse]);
+  }, [sessionId, handleAddMessage, showError, syncFromAgentResponse]);
 
   const handleStartCoding = async () => {
     try {
@@ -244,8 +259,7 @@ export default function InterviewPage() {
       handleAddMessage(res.data.response);
       syncFromAgentResponse(res?.data);
     } catch (error) {
-      console.error("Error in handleStartCoding:", error);
-      alert("Failed to transition to coding phase.");
+      showError(error, "moving to coding phase");
     } finally {
       setLoadingType(null);
     }
@@ -264,8 +278,7 @@ export default function InterviewPage() {
       handleAddMessage(res.data.response);
       syncFromAgentResponse(res?.data);
     } catch (error) {
-      console.error("Error in handleDryRun:", error);
-      alert("Failed to transition to dry run phase.");
+      showError(error, "moving to review phase");
     } finally {
       setLoadingType(null);
     }
@@ -292,8 +305,7 @@ export default function InterviewPage() {
       }
       syncFromAgentResponse(res?.data);
     } catch (error) {
-      console.error("Error in handleFeedback:", error);
-      alert("Failed to generate feedback. Please try again.");
+      showError(error, "generating feedback");
     } finally {
       setLoadingType(null);
     }
@@ -342,8 +354,7 @@ export default function InterviewPage() {
       syncFromAgentResponse(res?.data);
       setTimeoutModalOpen(false);
     } catch (error) {
-      console.error("Error handling timeout feedback:", error);
-      alert("Failed to generate feedback after timeout.");
+      showError(error, "generating timeout feedback");
     } finally {
       setLoadingType(null);
     }
@@ -374,8 +385,7 @@ export default function InterviewPage() {
       setTimeoutModalOpen(false);
       handleAddMessage("[SYSTEM] Extra time granted: +15 minutes. Continue from where you left off.", "AI");
     } catch (error) {
-      console.error("Error requesting extension:", error);
-      alert(error?.response?.data?.detail || "Extension request failed.");
+      showError(error, "requesting extra time");
     } finally {
       setLoadingType(null);
     }
@@ -427,7 +437,7 @@ ${message}
       }
       syncFromAgentResponse(res?.data);
     } catch (error) {
-      console.error("Error sending message:", error);
+      showError(error, "sending interview message");
     } finally {
       setLoadingType(null);
     }
@@ -459,6 +469,21 @@ ${message}
           <p className="text-slate-400 mt-2">Please wait while we analyze your performance</p>
         </div>
       )}
+      {uiError ? (
+        <div className="absolute top-24 right-4 z-50 max-w-md rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-100 shadow-lg">
+          <div className="flex items-start justify-between gap-3">
+            <p>{uiError}</p>
+            <button
+              type="button"
+              onClick={() => setUiError("")}
+              className="text-red-200 hover:text-white"
+              aria-label="Dismiss error"
+            >
+              x
+            </button>
+          </div>
+        </div>
+      ) : null}
       {timeoutModalOpen ? (
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center px-4">
           <div className="w-full max-w-xl rounded-xl border border-border-dark bg-[#111827] p-6">

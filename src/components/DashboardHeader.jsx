@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from './Api';
+import { getInterviewErrorMessage } from './interviewErrors';
 
 export default function DashboardHeader() {
     const navigate = useNavigate();
@@ -15,7 +16,7 @@ export default function DashboardHeader() {
             navigate(`/interviewPage/${session_deets.session_id}`, { state: { session_deets } });
         } catch (error) {
             console.error("Failed to start random interview", error);
-            alert("Failed to start interview.");
+            alert(getInterviewErrorMessage(error, "starting an interview"));
         } finally {
             setLoading(false);
         }

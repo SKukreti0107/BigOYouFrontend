@@ -35,7 +35,7 @@ export default function AIChatWindow({ chat_messages, curr_phase, onSendUserMess
                         if(msgType == "user"){
                             return <UserChatMessage key={index} text={msg.text}></UserChatMessage>
                         }
-                        else if(msgType == "ai"){
+                        else if (msgType == "ai") {
                             return <AIChatMessage key={index} text={msg.text}></AIChatMessage>
                         }
                         else{

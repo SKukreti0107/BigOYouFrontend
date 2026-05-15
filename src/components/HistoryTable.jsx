@@ -1,8 +1,10 @@
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
+import { useNavigate } from 'react-router-dom';
 import ScoreBar from './ScoreBar.jsx'
 
-const columns = [
+
+const getColumns = (onViewSummary) => [
     {
         field: 'Problem',
         headerName: 'Problem',
@@ -45,10 +47,15 @@ const columns = [
     {
         field: 'Action',
         headerName: 'Action',
-        width: 300,
-        renderCell: () => (
+        width: 220,
+        sortable: false,
+        filterable: false,
+        renderCell: (params) => (
             <div className="flex h-full w-full items-center">
-                <button className="flex items-center gap-1.5 px-3 rounded-lg border border-[#30363d] bg-[#21262d] hover:bg-[#30363d] hover:border-slate-500 text-slate-300 hover:text-white text-[11px] font-semibold tracking-wide uppercase transition-all cursor-pointer group">
+                <button
+                    onClick={() => onViewSummary?.(params.row)}
+                    className="flex items-center gap-1.5 px-3 rounded-lg border border-[#30363d] bg-[#21262d] hover:bg-[#30363d] hover:border-slate-500 text-slate-300 hover:text-white text-[11px] font-semibold tracking-wide uppercase transition-all cursor-pointer group"
+                >
                     View Summary
                     <span className="material-symbols-outlined text-[14px] text-slate-400 group-hover:text-white transition-colors">arrow_forward</span>
                 </button>
@@ -57,19 +64,22 @@ const columns = [
     },
 ];
 
-const rows = [
-    { id: 1, Problem: 'Snow', Topic: 'Jon', Difficulty: 14, Score: 10, Date: '2022-01-01', Action: 'View' },
-    { id: 2, Problem: 'Lannister', Topic: 'Cersei', Difficulty: 31, Score: 96, Date: '2022-01-01', Action: 'View' },
-    { id: 3, Problem: 'Lannister', Topic: 'Jaime', Difficulty: 31, Score: 13, Date: '2022-01-01', Action: 'View' },
-    { id: 4, Problem: 'Stark', Topic: 'Arya', Difficulty: 11, Score: 45, Date: '2022-01-01', Action: 'View' },
-    { id: 5, Problem: 'Targaryen', Topic: 'Daenerys', Difficulty: null, Score: 66, Date: '2022-01-01', Action: 'View' },
-    { id: 6, Problem: 'Melisandre', Topic: null, Difficulty: 150, Score: 100, Date: '2022-01-01', Action: 'View' },
-    { id: 7, Problem: 'Clifford', Topic: 'Ferrara', Difficulty: 44, Score: 100, Date: '2022-01-01', Action: 'View' },
-    { id: 8, Problem: 'Frances', Topic: 'Rossini', Difficulty: 36, Score: 100, Date: '2022-01-01', Action: 'View' },
-    { id: 9, Problem: 'Roxie', Topic: 'Harvey', Difficulty: 65, Score: 100, Date: '2022-01-01', Action: 'View' },
-];
+export default function HistoryTable({ sessions }) {
+    const navigate = useNavigate();
 
-export default function HistoryTable() {
+    const handleViewSummary = (row) => {
+        if (!row?.id) {
+            return;
+        }
+        navigate(`/history/session/${row.id}`);
+    };
+
+    const rows = (Array.isArray(sessions) ? sessions : []).map((session, index) => ({
+        ...session,
+        id: session.id ?? `${session.Problem ?? "session"}-${index}`,
+        Date: session.Date ? new Date(session.Date).toLocaleDateString() : "",
+    }));
+
     return (
         <div className='w-full'>
             <Box sx={{
@@ -82,7 +92,7 @@ export default function HistoryTable() {
             }}>
                 <DataGrid
                     rows={rows}
-                    columns={columns}
+                    columns={getColumns(handleViewSummary)}
                     rowHeight={70}
                     getRowSpacing={(params) => ({
                         top: params.isFirstVisible ? 0 : 5,
@@ -144,11 +154,11 @@ export default function HistoryTable() {
                     initialState={{
                         pagination: {
                             paginationModel: {
-                                pageSize: 5,
+                                pageSize: 10,
                             },
                         },
                     }}
-                    pageSizeOptions={[5]}
+                    pageSizeOptions={[10]}
                     disableRowSelectionOnClick
                 />
             </Box>
