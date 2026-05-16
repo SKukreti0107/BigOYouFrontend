@@ -64,7 +64,13 @@ const getColumns = (onViewSummary) => [
     },
 ];
 
-export default function HistoryTable({ sessions }) {
+export default function HistoryTable({
+    sessions,
+    total = 0,
+    loading = false,
+    paginationModel,
+    onPaginationModelChange,
+}) {
     const navigate = useNavigate();
 
     const handleViewSummary = (row) => {
@@ -93,6 +99,12 @@ export default function HistoryTable({ sessions }) {
                 <DataGrid
                     rows={rows}
                     columns={getColumns(handleViewSummary)}
+                    loading={loading}
+                    pagination
+                    paginationMode="server"
+                    rowCount={total}
+                    paginationModel={paginationModel}
+                    onPaginationModelChange={onPaginationModelChange}
                     rowHeight={70}
                     getRowSpacing={(params) => ({
                         top: params.isFirstVisible ? 0 : 5,
@@ -151,14 +163,7 @@ export default function HistoryTable({ sessions }) {
                             display: 'none',
                         },
                     }}
-                    initialState={{
-                        pagination: {
-                            paginationModel: {
-                                pageSize: 10,
-                            },
-                        },
-                    }}
-                    pageSizeOptions={[10]}
+                    pageSizeOptions={[5, 10, 20]}
                     disableRowSelectionOnClick
                 />
             </Box>

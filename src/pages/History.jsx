@@ -5,20 +5,37 @@ import api from "../components/Api";
 
 function History({ setIsUser, isUser }) {
     const [sessions, setSessions] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [paginationModel, setPaginationModel] = useState({
+        page: 0,
+        pageSize: 10,
+    });
 
     useEffect(() => {
         const fetchSessions = async () => {
+            setLoading(true);
             try {
-                const response = await api.get("/history");
+                const response = await api.get("/history", {
+                    params: {
+                        page: paginationModel.page + 1,
+                        page_size: paginationModel.pageSize,
+                    },
+                });
                 const data = response.data;
-                console.log(`data:`, data);
-                setSessions(Array.isArray(data) ? data : []);
+                console.log(`data`, data)
+                setSessions(Array.isArray(data?.sessions) ? data.sessions : []);
+                setTotal(data?.total ?? 0);
             } catch (error) {
                 console.error(error);
+                setSessions([]);
+                setTotal(0);
+            } finally {
+                setLoading(false);
             }
         };
         fetchSessions();
-    }, []);
+    }, [paginationModel.page, paginationModel.pageSize]);
 
     return (
         <div className="min-h-screen bg-[#0d1117] text-slate-200">
@@ -48,7 +65,13 @@ function History({ setIsUser, isUser }) {
                     </header>
 
                     <div className="px-8 flex flex-col gap-8 pb-12">
-                        <HistoryTable sessions={sessions} />
+                        <HistoryTable
+                            sessions={sessions}
+                            total={total}
+                            loading={loading}
+                            paginationModel={paginationModel}
+                            onPaginationModelChange={setPaginationModel}
+                        />
                     </div>
                 </main>
             </div>
