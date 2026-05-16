@@ -1,5 +1,17 @@
-export default function LastInterviewFeedback({ positive=["Excellent approach explanation; communicated trade-offs clearly before coding.", "Optimal space complexity achieved through in-place pointer manipulation."], negative=["Missed edge case: failed to handle empty input arrays which caused a runtime error."] }) {
+import { useNavigate } from 'react-router-dom';
+import api from './Api'
 
+export default function LastInterviewFeedback({ positive = ["Excellent approach explanation; communicated trade-offs clearly before coding.", "Optimal space complexity achieved through in-place pointer manipulation."], negative = ["Missed edge case: failed to handle empty input arrays which caused a runtime error."] }) {
+    const navigate = useNavigate();
+    const get_last_interview_session_id = async () => {
+        const response = await api.get('/last_session_id');
+        console.log(response.data);
+        return response.data.last_session_id;
+    };
+    const handleClick = async () => {
+        const session_id = await get_last_interview_session_id();
+        navigate(`/history/session/${session_id}`);
+    };
     return (
         <div className="bg-indigo-900/20 border border-indigo-500/30 rounded-2xl p-6 shadow-lg shadow-indigo-950/20 relative overflow-hidden group">
             <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -32,7 +44,7 @@ export default function LastInterviewFeedback({ positive=["Excellent approach ex
                 ))}
             </ul>
 
-            <button className="w-full py-2.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-[10px] font-black uppercase tracking-widest text-indigo-100 transition-all relative z-10">
+            <button onClick={handleClick}  className="w-full py-2.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-[10px] font-black uppercase tracking-widest text-indigo-100 transition-all relative z-10 cursor-pointer">
                 View Full Feedback Report
             </button>
         </div>
