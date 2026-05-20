@@ -208,33 +208,31 @@ export default function InterviewPage() {
   }, []);
 
   useEffect(() => {
-    const loadSessionMessages = async () => {
+    const didInitKey = `interview.agent_init.${sessionId}`;
+
+    const initOrRestore = async () => {
+      // 1. Try to load existing agent messages first
       try {
         const res = await api.get("/interview/agent_messages", {
           params: { session_id: sessionId },
         });
         const restored = Array.isArray(res.data) ? res.data : [];
         if (restored.length) {
+          // Session was already initialized — restore messages, skip agent_init
           const formattedMessages = restored.map((msg) => ({
             type: msg.role === "user" ? "user" : "ai",
             text: msg.content
           }));
           setMessages(formattedMessages);
+          sessionStorage.setItem(didInitKey, "1");
+          return; // Do NOT re-init the agent
         }
       } catch (error) {
         showError(error, "loading interview messages");
       }
-    };
 
-    loadSessionMessages();
-  }, [sessionId, showError]);
-
-  useEffect(() => {
-    const didInitKey = `interview.agent_init.${sessionId}`;
-
-    if (sessionStorage.getItem(didInitKey)) return;
-
-    const initAgent = async () => {
+      // 2. No existing messages — this is a brand-new session, init the agent
+      if (sessionStorage.getItem(didInitKey)) return;
       try {
         let res = await api.post("/interview/agent_init", { session_id: sessionId, role: "system" });
         handleAddMessage(res.data.response);
@@ -245,7 +243,7 @@ export default function InterviewPage() {
       }
     };
 
-    initAgent();
+    initOrRestore();
   }, [sessionId, handleAddMessage, showError, syncFromAgentResponse]);
 
   const handleStartCoding = async () => {

@@ -5,6 +5,7 @@ import PerformanceAnalytics from '../components/PerformanceAnalytics';
 import StreakCard from '../components/StreakCard';
 import QuickStats from '../components/QuickStats';
 import WeakAreas from '../components/WeakAreas';
+import ContinueSessionCard from '../components/ContinueSessionCard';
 import api from '../components/Api';
 import { useMemo, useState, useEffect } from 'react';
 
@@ -60,6 +61,9 @@ export default function Dashboard({ setIsUser, isUser }) {
                     <div className="flex-grow overflow-y-auto custom-scrollbar p-8">
                         <div className="w-full xl:max-w-[1600px] mx-auto space-y-6">
                             
+                            {/* Paused session banner */}
+                            <ContinueSessionCard userId={userId} />
+
                             {/* Top row: Streak Card and Quick Stats */}
                             <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
                                 <div className="xl:col-span-2">
