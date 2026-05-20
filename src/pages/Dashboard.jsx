@@ -57,34 +57,35 @@ export default function Dashboard({ setIsUser, isUser }) {
                             {/* Top row: Streak Card and Quick Stats */}
                             <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
                                 <div className="xl:col-span-2">
-                                    <StreakCard />
+                                    <StreakCard streak={dashboardData?.streak} />
                                 </div>
                                 <div className="xl:col-span-3">
-                                    <QuickStats />
+                                    <QuickStats stats={dashboardData?.quick_stats} />
                                 </div>
                             </div>
 
-                            {/* Middle row: Score Trend and Feedback */}
+                            {/* Middle row: Score Trend, Feedback & Weak Areas */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                <div className="lg:col-span-2 bg-[#161b22] border border-[#30363d] rounded-2xl p-6">
-                                    <div className="flex items-center justify-between mb-8">
+                                <div className="lg:col-span-2 bg-[#161b22] border border-[#30363d] rounded-2xl p-6 flex flex-col justify-between">
+                                    <div className="flex items-center justify-between mb-6">
                                         <div>
                                             <h3 className="font-bold text-lg">Score Trend</h3>
                                             <p className="text-[10px] text-slate-500 uppercase tracking-widest">Last 10 Sessions</p>
                                         </div>
                                     </div>
-                                    <PerformanceAnalytics></PerformanceAnalytics>
+                                    <div className="w-full">
+                                        <PerformanceAnalytics scoreTrend={dashboardData?.score_trend} />
+                                    </div>
                                 </div>
 
-                                <div className="lg:col-span-1">
+                                <div className="lg:col-span-1 flex flex-col gap-6">
                                     <LastInterviewFeedback
                                         positive={dashboardData?.last_interview_feedback?.strengths}
                                         negative={dashboardData?.last_interview_feedback?.weaknesses}
                                         score={dashboardData?.last_interview_feedback?.score}
                                     />
+                                    <WeakAreas weakAreas={dashboardData?.weak_areas} />
                                 </div>
-
-                                {/* <WeakAreas /> */}
                             </div>
                             
                         </div>
