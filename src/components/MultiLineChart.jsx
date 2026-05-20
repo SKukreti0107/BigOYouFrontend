@@ -12,9 +12,10 @@ export default function PerformanceLineChart({ height = 360, scoreTrend }) {
     let mediumScores = [];
     let hardScores = [];
     let xLabels = [];
-    let isMock = false;
+    let hasData = false;
 
     if (scoreTrend && scoreTrend.length >= 2) {
+        hasData = true;
         scoreTrend.forEach((item, idx) => {
             const formattedDate = item.date ? new Date(item.date).toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) : `Session ${item.session_number}`;
             xLabels.push(formattedDate);
@@ -38,13 +39,28 @@ export default function PerformanceLineChart({ height = 360, scoreTrend }) {
                 hardScores.push(null);
             }
         });
-    } else {
-        // Default benchmark metrics
-        easyScores = [72, 78, 85, 82, 88, 91, 95];
-        mediumScores = [58, 62, 55, 68, 72, 75, 82];
-        hardScores = [35, 42, 38, 48, 55, 52, 65];
-        xLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7'];
-        isMock = true;
+    }
+
+    if (!hasData) {
+        return (
+            <div
+                style={{ height }}
+                className="w-full rounded-xl border border-[#30363d] bg-[#0d1117]/30 flex flex-col items-center justify-center gap-4"
+            >
+                <svg className="w-full h-[55%] px-8 opacity-[0.07]" viewBox="0 0 400 200" preserveAspectRatio="none">
+                    <path d="M 0 170 Q 60 130 120 140 T 240 90 T 360 110 T 400 50" fill="none" stroke="#137fec" strokeWidth="3" />
+                    <path d="M 0 180 Q 80 160 160 155 T 320 130 T 400 100" fill="none" stroke="#10b981" strokeWidth="3" />
+                    <line x1="0" y1="195" x2="400" y2="195" stroke="#30363d" strokeWidth="2" />
+                </svg>
+                <div className="flex flex-col items-center gap-2 pb-6 -mt-4">
+                    <span className="material-symbols-outlined text-slate-700 text-4xl">show_chart</span>
+                    <p className="text-slate-500 text-sm font-semibold">No score trend yet</p>
+                    <p className="text-slate-700 text-xs text-center max-w-[240px] leading-relaxed">
+                        Complete at least 2 mock interviews to unlock your performance trend graph.
+                    </p>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -84,11 +100,6 @@ export default function PerformanceLineChart({ height = 360, scoreTrend }) {
                 },
             }}
         >
-            {isMock && (
-                <div className="absolute top-4 left-4 z-20 px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded-md text-[9px] font-black text-amber-500 uppercase tracking-widest animate-pulse pointer-events-none">
-                    Benchmark Insights
-                </div>
-            )}
             <LineChart
                 series={[
                     {

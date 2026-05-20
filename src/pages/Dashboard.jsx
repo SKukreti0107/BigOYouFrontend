@@ -91,7 +91,8 @@ export default function Dashboard({ setIsUser, isUser }) {
                                         score={dashboardData?.last_interview_feedback?.score}
                                         loading={loading}
                                     />
-                                    <WeakAreas weakAreas={dashboardData?.weak_areas} loading={loading} />
+                                    <WeakAreas weakAreas={dashboardData?.weak_areas} interviewsTaken={dashboardData?.quick_stats?.interviews_taken ?? 0} loading={loading} />
+
                                 </div>
                             </div>
                             

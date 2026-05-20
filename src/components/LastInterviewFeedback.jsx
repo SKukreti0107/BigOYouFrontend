@@ -2,13 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import api from './Api'
 
 export default function LastInterviewFeedback({
-    positive = [
-        { title: "Excellent approach explanation; communicated trade-offs clearly before coding." },
-        { title: "Optimal space complexity achieved through in-place pointer manipulation." }
-    ],
-    negative = [
-        { title: "Missed edge case: failed to handle empty input arrays which caused a runtime error." }
-    ],
+    positive = [],
+    negative = [],
     score = null,
     loading = false,
 }) {
@@ -117,10 +112,16 @@ export default function LastInterviewFeedback({
                         ))}
                     </ul>
                 ) : (
-                    <div className="py-4 text-center relative z-10">
-                        <p className="text-xs text-indigo-200/70 italic leading-relaxed">
-                            No feedback available yet. Complete a mock interview session to unlock premium AI insights!
-                        </p>
+                    <div className="py-6 text-center flex flex-col items-center justify-center gap-3 relative z-10">
+                        <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                            <span className="material-symbols-outlined text-indigo-600 text-2xl">smart_toy</span>
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-slate-500">No feedback yet</p>
+                            <p className="text-xs text-slate-700 mt-1 leading-relaxed max-w-[200px]">
+                                Finish your first mock interview to get detailed AI feedback here.
+                            </p>
+                        </div>
                     </div>
                 )}
             </div>

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
-export default function WeakAreas({ weakAreas, loading = false }) {
+export default function WeakAreas({ weakAreas, interviewsTaken = 0, loading = false }) {
     const navigate = useNavigate();
 
     if (loading) {
@@ -48,41 +48,22 @@ export default function WeakAreas({ weakAreas, loading = false }) {
     }
 
     let displayAreas = [];
-    let isMock = false;
     let isAllStrong = false;
+    // A user truly has no data when they haven't taken any interviews yet.
+    // The API returns [] for both new users AND users strong in all areas,
+    // so we use interviewsTaken to distinguish between the two.
+    const hasNoInterviews = interviewsTaken === 0;
 
-    if (weakAreas !== undefined && weakAreas !== null) {
-        if (weakAreas.length > 0) {
-            displayAreas = weakAreas;
-        } else {
-            // If they have taken interviews but weakAreas is empty, they are strong in everything!
-            isAllStrong = true;
-        }
-    } else {
-        // Fallback to beautiful default benchmarks
-        displayAreas = [
-            {
-                topic: "Dynamic Programming",
-                success_rate: 35,
-                improvement_tip: "State transitions & overlapping subproblems."
-            },
-            {
-                topic: "System Design",
-                success_rate: 55,
-                improvement_tip: "Scalability patterns & database sharding."
-            }
-        ];
-        isMock = true;
+    if (weakAreas && weakAreas.length > 0) {
+        displayAreas = weakAreas;
+    } else if (!hasNoInterviews) {
+        // They've done interviews but have no weak areas — great!
+        isAllStrong = true;
     }
 
     return (
         <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 relative overflow-hidden group flex-grow flex flex-col justify-between min-h-[220px]">
-            {isMock && (
-                <div className="absolute top-4 right-4 z-20 px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded-md text-[9px] font-black text-amber-500 uppercase tracking-widest animate-pulse pointer-events-none">
-                    Benchmark
-                </div>
-            )}
-            
+
             <div>
                 <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center border border-rose-500/20">
@@ -94,7 +75,26 @@ export default function WeakAreas({ weakAreas, loading = false }) {
                     </div>
                 </div>
 
-                {isAllStrong ? (
+                {hasNoInterviews ? (
+                    /* Empty state for new users */
+                    <div className="py-6 text-center flex flex-col items-center justify-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-slate-800/60 border border-[#30363d] flex items-center justify-center">
+                            <span className="material-symbols-outlined text-slate-600 text-2xl">bar_chart</span>
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-bold text-slate-400">No data yet</h4>
+                            <p className="text-xs text-slate-600 max-w-[200px] leading-relaxed mt-1">
+                                Complete mock interviews to discover your weak areas and get targeted tips.
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => navigate('/practice')}
+                            className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-black uppercase tracking-wider rounded-lg border border-[#30363d] transition-all cursor-pointer"
+                        >
+                            Take an Interview
+                        </button>
+                    </div>
+                ) : isAllStrong ? (
                     <div className="py-6 text-center flex flex-col items-center justify-center gap-2">
                         <span className="material-symbols-outlined text-emerald-500 text-4xl">verified</span>
                         <h4 className="text-sm font-bold text-slate-200 mt-1">Outstanding Performance!</h4>

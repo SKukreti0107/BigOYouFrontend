@@ -39,7 +39,7 @@ export default function StreakCard({ streak = 0, loading = false }) {
                 <p className="text-white/70 text-[11px] font-medium leading-relaxed mt-1">
                     {displayStreak > 0 
                       ? "You're on a roll! Complete a mock interview today to keep your streak alive." 
-                      : "Start your first mock interview today to begin your streak and build momentum!"}
+                      : "No active streak yet. Complete your first interview to ignite your journey!"}
                 </p>
             </div>
             <button 
