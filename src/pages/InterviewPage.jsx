@@ -5,7 +5,7 @@ import InterviewPageNav from "../components/InterviewPageNav"
 import InterviewFeedback from "../components/InterviewFeedback"
 import InterviewRightSidebar from "../components/InterviewRightSidebar"
 import Notepad from "../components/Notepad"
-import { useLocation, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { useState, useEffect, useCallback, useRef } from "react"
 import api from "../components/Api"
 import { getInterviewErrorMessage } from "../components/interviewErrors"
@@ -24,6 +24,7 @@ const getStarterCode = (language) => {
 
 
 export default function InterviewPage() {
+  const navigate = useNavigate();
   // ── Fullscreen lock ──
   const [isFullscreen, setIsFullscreen] = useState(false);
   const fullscreenRequested = useRef(false);
@@ -142,6 +143,7 @@ export default function InterviewPage() {
   const TIMEOUT_ACTION_KEY = `interview.timeout_action.${sessionId}`;
 
   const [timeoutModalOpen, setTimeoutModalOpen] = useState(false);
+  const [endModalOpen, setEndModalOpen] = useState(false);
   const [timeoutState, setTimeoutState] = useState(() => {
     try {
       const stored = sessionStorage.getItem(TIMEOUT_STATE_KEY);
@@ -325,6 +327,39 @@ export default function InterviewPage() {
     setTimeoutModalOpen(true);
   }
 
+  const handleEndInterviewClick = () => {
+    setEndModalOpen(true);
+  }
+
+  const handleConfirmEndInterview = async () => {
+    try {
+      setLoadingType("ENDING");
+      const res = await api.post("/interview/end", {
+        session_id: sessionId,
+        message: "[SYSTEM EVENT] User ended the interview.",
+        code: code,
+        language: language,
+        role: "system",
+        time_expired: timeoutState.timeExpired,
+        extra_time_used: timeoutState.extraTimeUsed,
+        extension_count: timeoutState.extensionCount,
+        session_ended_by: "USER_END",
+        exit_clicked: true,
+      });
+
+      if (res?.data?.response) {
+        handleAddMessage(res.data.response, "ai");
+      }
+      syncFromAgentResponse(res?.data);
+      setEndModalOpen(false);
+      navigate("/dashboard");
+    } catch (error) {
+      showError(error, "ending interview");
+    } finally {
+      setLoadingType(null);
+    }
+  }
+
   const handleTimeoutEndFeedback = async () => {
     try {
       setLoadingType('FEEDBACK');
@@ -461,7 +496,7 @@ ${message}
           </button>
         </div>
       )}
-      <InterviewPageNav curr_phase={phase}></InterviewPageNav>
+      <InterviewPageNav curr_phase={phase} onEndInterview={handleEndInterviewClick}></InterviewPageNav>
       {loadingType === 'FEEDBACK' && (
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -507,6 +542,34 @@ ${message}
               >
                 {loadingType === 'MESSAGE' && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
                 {loadingType === 'MESSAGE' ? 'Granting extra time...' : `Request +15 min extension (${timeoutState.extensionCount}/${timeoutState.maxExtensions} used)`}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {endModalOpen ? (
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center px-4">
+          <div className="w-full max-w-xl rounded-xl border border-border-dark bg-[#111827] p-6">
+            <h3 className="text-xl font-bold text-white mb-2">End interview now?</h3>
+            <p className="text-slate-300 mb-6">Your interview will be terminated and no feedback will be generated.</p>
+            <div className="grid gap-3">
+              <button
+                type="button"
+                disabled={loadingType !== null}
+                onClick={handleConfirmEndInterview}
+                className="w-full rounded bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-500 disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {loadingType === "ENDING" && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
+                {loadingType === "ENDING" ? "Ending interview..." : "End interview"}
+              </button>
+              <button
+                type="button"
+                disabled={loadingType !== null}
+                onClick={() => setEndModalOpen(false)}
+                className="w-full rounded bg-slate-700 px-4 py-3 font-semibold text-white hover:bg-slate-600 disabled:opacity-60"
+              >
+                Cancel
               </button>
             </div>
           </div>

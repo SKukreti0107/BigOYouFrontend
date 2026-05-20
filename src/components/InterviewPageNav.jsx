@@ -1,4 +1,4 @@
-export default function InterviewPageNav({ curr_phase }) {
+export default function InterviewPageNav({ curr_phase, onEndInterview }) {
   const phases = [
     "PROBLEM_DISCUSSION",
     "CODING",
@@ -29,7 +29,11 @@ export default function InterviewPageNav({ curr_phase }) {
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <button className="px-4 py-1.5 rounded hover:bg-slate-700 text-sm font-medium transition-colors border border-border-dark bg-red-500/10">
+        <button
+          type="button"
+          onClick={onEndInterview}
+          className="px-4 py-1.5 rounded hover:bg-slate-700 text-sm font-medium transition-colors border border-border-dark bg-red-500/10"
+        >
           End Interview
         </button>
       </div>
