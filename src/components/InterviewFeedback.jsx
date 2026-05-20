@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-export default function InterviewFeedback({ feedback }) {
+export default function InterviewFeedback({ feedback, reference }) {
     const data = useMemo(() => {
         if (!feedback) return null;
         if (typeof feedback === 'string') {
@@ -169,6 +169,75 @@ export default function InterviewFeedback({ feedback }) {
                             />
                         </div>
                     </div>
+
+                    {/* Reference Solution */}
+                    {reference && (
+                        <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center border border-violet-500/20">
+                                    <span className="material-symbols-outlined">menu_book</span>
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-lg text-slate-200">Reference Solution</h3>
+                                    <p className="text-xs text-slate-500">Optimal approach and key insights</p>
+                                </div>
+                            </div>
+
+                            {/* Optimal Approach */}
+                            <div className="mb-5">
+                                <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2 mb-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
+                                    Optimal Approach
+                                </h4>
+                                <p className="text-sm text-slate-400 leading-relaxed ml-3.5 whitespace-pre-line">{reference.optimal_approach}</p>
+                            </div>
+
+                            {/* Complexity badges */}
+                            <div className="flex gap-3 mb-5">
+                                <div className="flex-1 bg-[#0d1117]/50 border border-[#30363d] rounded-xl p-3 text-center">
+                                    <span className="block text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Time</span>
+                                    <span className="text-sm font-mono font-bold text-emerald-400">{reference.time_complexity}</span>
+                                </div>
+                                <div className="flex-1 bg-[#0d1117]/50 border border-[#30363d] rounded-xl p-3 text-center">
+                                    <span className="block text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Space</span>
+                                    <span className="text-sm font-mono font-bold text-[#137fec]">{reference.space_complexity}</span>
+                                </div>
+                            </div>
+
+                            {/* Key Insights */}
+                            <div className="mb-5">
+                                <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2 mb-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    Key Insights
+                                </h4>
+                                <p className="text-sm text-slate-400 leading-relaxed ml-3.5 whitespace-pre-line">{reference.key_insights}</p>
+                            </div>
+
+                            {/* Common Pitfalls */}
+                            {reference.common_pitfalls && (
+                                <div className="mb-5">
+                                    <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2 mb-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                        Common Pitfalls
+                                    </h4>
+                                    <div className="ml-3.5 p-3 bg-rose-500/5 border border-rose-500/10 rounded-lg">
+                                        <p className="text-sm text-rose-300/70 leading-relaxed whitespace-pre-line">{reference.common_pitfalls}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Pseudocode */}
+                            {reference.pseudocode && (
+                                <div>
+                                    <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2 mb-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#137fec]"></span>
+                                        Pseudocode
+                                    </h4>
+                                    <pre className="ml-3.5 p-4 bg-[#0d1117] border border-[#30363d] rounded-xl text-xs text-slate-300 font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap">{reference.pseudocode}</pre>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Right Column: Improvement Plan */}

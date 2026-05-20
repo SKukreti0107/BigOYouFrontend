@@ -53,7 +53,7 @@ export default function Dashboard({ setIsUser, isUser }) {
     return (
         <div className="min-h-screen bg-[#0d1117] text-slate-200">
             <div className="flex min-h-screen overflow-hidden">
-                <Sidebar></Sidebar>  
+                <Sidebar isUser={isUser}></Sidebar>  
 
                 <main className="flex-grow flex flex-col overflow-hidden bg-[#0d1117]">
                     <DashboardHeader isUser={isUser} />

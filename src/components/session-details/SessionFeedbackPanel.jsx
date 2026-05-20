@@ -1,6 +1,6 @@
 import InterviewFeedback from "../InterviewFeedback";
 
-export default function SessionFeedbackPanel({ feedback }) {
+export default function SessionFeedbackPanel({ feedback, reference }) {
     return (
         <section className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6">
             <h3 className="text-lg font-semibold text-slate-100 mb-4">Feedback Summary</h3>
@@ -9,7 +9,7 @@ export default function SessionFeedbackPanel({ feedback }) {
                     Feedback not generated yet.
                 </div>
             ) : (
-                <InterviewFeedback feedback={feedback} />
+                <InterviewFeedback feedback={feedback} reference={reference} />
             )}
         </section>
     );

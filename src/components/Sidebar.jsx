@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import api from './Api'
 
-export default function Sidebar(){
+export default function Sidebar({ isUser }){
     const {pathname} = useLocation();
     const isActive = (path) =>{
         return pathname === path;
     } 
+
+    const isAdmin = isUser?.email === "shubhamkukreti.0107@gmail.com";
 
     const handleLogout = async () => {
         try {
@@ -41,6 +43,12 @@ export default function Sidebar(){
                                 <span className="material-symbols-outlined text-[20px]">settings</span>
                                 <span className="text-sm font-medium">Settings</span>
                             </Link>
+                            {isAdmin && (
+                                <Link to={"/admin"} className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors cursor-pointer ${isActive("/admin") ? "text-amber-400 bg-amber-500/10 border border-amber-500/20" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}>
+                                    <span className="material-symbols-outlined text-[20px]">shield_person</span>
+                                    <span className="text-sm font-medium">Admin</span>
+                                </Link>
+                            )}
                         </nav>
                     </div>
                     <div className="mt-auto p-4 border-t border-[#30363d]">

@@ -23,6 +23,7 @@ export default function SessionDetails() {
     const [metrics, setMetrics] = useState(null);
     const [latestCode, setLatestCode] = useState(null);
     const [feedback, setFeedback] = useState(null);
+    const [reference, setReference] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -41,9 +42,10 @@ export default function SessionDetails() {
                 api.get("/interview/session/metrics", { params: { session_id: sessionId } }),
                 api.get("/interview/session/code_states", { params: { session_id: sessionId } }),
                 api.get("/interview/session/feedback", { params: { session_id: sessionId } }),
+                api.get(`/admin/reference/by-session/${sessionId}`),
             ]);
 
-            const [overviewRes, metricsRes, codeStatesRes, feedbackRes] = requests;
+            const [overviewRes, metricsRes, codeStatesRes, feedbackRes, refRes] = requests;
 
             if (overviewRes.status === "fulfilled") {
                 setOverview(overviewRes.value?.data ?? null);
@@ -69,6 +71,12 @@ export default function SessionDetails() {
                 setFeedback(payload ? { feedback: payload } : null);
             } else {
                 setFeedback(null);
+            }
+
+            if (refRes.status === "fulfilled") {
+                setReference(refRes.value?.data?.reference ?? null);
+            } else {
+                setReference(null);
             }
 
             if (requests.every((res) => res.status === "rejected")) {
@@ -119,7 +127,7 @@ export default function SessionDetails() {
                                 <SessionOverviewCard overview={overview} />
                                 <SessionMetricsCard metrics={metrics} />
                                 <LatestCodeCard latestCode={latestCode} />
-                                <SessionFeedbackPanel feedback={feedback} />
+                                <SessionFeedbackPanel feedback={feedback} reference={reference} />
                             </>
                         )}
                     </div>
