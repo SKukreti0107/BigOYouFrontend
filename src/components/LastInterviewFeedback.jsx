@@ -10,8 +10,42 @@ export default function LastInterviewFeedback({
         { title: "Missed edge case: failed to handle empty input arrays which caused a runtime error." }
     ],
     score = null,
+    loading = false,
 }) {
     const navigate = useNavigate();
+    
+    if (loading) {
+        return (
+            <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 relative overflow-hidden flex-grow flex flex-col justify-between min-h-[220px] animate-pulse">
+                <div className="space-y-4">
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-slate-800 shrink-0"></div>
+                        <div className="flex-grow space-y-2">
+                            <div className="h-4 w-32 bg-slate-800 rounded"></div>
+                            <div className="h-3 w-20 bg-slate-800 rounded"></div>
+                        </div>
+                        <div className="flex flex-col items-end space-y-1">
+                            <div className="h-3 w-10 bg-slate-800 rounded"></div>
+                            <div className="h-6 w-12 bg-slate-800 rounded"></div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-3.5 mt-2">
+                        <div className="flex gap-3">
+                            <div className="w-4 h-4 bg-slate-800 rounded-full shrink-0"></div>
+                            <div className="h-3 w-full bg-slate-800 rounded"></div>
+                        </div>
+                        <div className="flex gap-3">
+                            <div className="w-4 h-4 bg-slate-800 rounded-full shrink-0"></div>
+                            <div className="h-3 w-5/6 bg-slate-800 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="h-10 w-full bg-slate-800 rounded-lg mt-4"></div>
+            </div>
+        );
+    }
     
     const get_last_interview_session_id = async () => {
         const response = await api.get('/last_session_id');

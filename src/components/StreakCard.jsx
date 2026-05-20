@@ -1,7 +1,26 @@
 import { useNavigate } from "react-router-dom";
 
-export default function StreakCard({ streak = 0 }) {
+export default function StreakCard({ streak = 0, loading = false }) {
     const navigate = useNavigate();
+    
+    if (loading) {
+        return (
+            <div className="xl:col-span-1 relative bg-[#161b22] border border-[#30363d] rounded-2xl p-6 flex flex-col justify-between min-h-[200px] overflow-hidden animate-pulse">
+                <div className="space-y-4">
+                    <div className="h-6 w-24 bg-slate-800 rounded"></div>
+                    <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 bg-slate-800 rounded-full"></div>
+                        <div className="h-8 w-28 bg-slate-800 rounded"></div>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="h-3.5 w-full bg-slate-800 rounded"></div>
+                        <div className="h-3.5 w-4/5 bg-slate-800 rounded"></div>
+                    </div>
+                </div>
+                <div className="h-12 w-full bg-slate-800 rounded-xl mt-4"></div>
+            </div>
+        );
+    }
     
     const displayStreak = streak !== undefined && streak !== null ? streak : 0;
     

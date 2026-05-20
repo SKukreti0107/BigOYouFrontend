@@ -61,7 +61,7 @@ function App() {
         <Practice />
       </ProtectedRoute>}></Route>
       <Route path='/settings' element={<ProtectedRoute isUser={isUser}>
-        <Settings isUser={isUser} />
+        <Settings isUser={isUser} checkAuth={checkAuth} />
       </ProtectedRoute>}></Route>
       {/* <Route path="/feedback" element={<InterviewFeedback></InterviewFeedback> } /> */}
     </Routes>

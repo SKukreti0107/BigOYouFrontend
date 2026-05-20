@@ -11,6 +11,8 @@ import { useMemo, useState, useEffect } from 'react';
 
 export default function Dashboard({ setIsUser, isUser }) {
     const [dashboardData, setDashboardData] = useState({});
+    const [loading, setLoading] = useState(true);
+    
     const userId = useMemo(() => {
         if (!isUser) {
             return null;
@@ -25,9 +27,11 @@ export default function Dashboard({ setIsUser, isUser }) {
         const fetchDashboardData = async () => {
             if (!userId) {
                 setDashboardData({});
+                setLoading(false);
                 return;
             }
             try {
+                setLoading(true);
                 const res = await api.get('/dashboard', {
                     params: {
                         user_id: userId,
@@ -38,6 +42,8 @@ export default function Dashboard({ setIsUser, isUser }) {
             } catch (error) {
                 console.error("Failed to load dashboard data:", error);
                 setDashboardData({});
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -50,17 +56,17 @@ export default function Dashboard({ setIsUser, isUser }) {
                 <Sidebar></Sidebar>  
 
                 <main className="flex-grow flex flex-col overflow-hidden bg-[#0d1117]">
-                    <DashboardHeader />
+                    <DashboardHeader isUser={isUser} />
                     <div className="flex-grow overflow-y-auto custom-scrollbar p-8">
                         <div className="w-full xl:max-w-[1600px] mx-auto space-y-6">
                             
                             {/* Top row: Streak Card and Quick Stats */}
                             <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
                                 <div className="xl:col-span-2">
-                                    <StreakCard streak={dashboardData?.streak} />
+                                    <StreakCard streak={dashboardData?.streak} loading={loading} />
                                 </div>
                                 <div className="xl:col-span-3">
-                                    <QuickStats stats={dashboardData?.quick_stats} />
+                                    <QuickStats stats={dashboardData?.quick_stats} loading={loading} />
                                 </div>
                             </div>
 
@@ -74,7 +80,7 @@ export default function Dashboard({ setIsUser, isUser }) {
                                         </div>
                                     </div>
                                     <div className="w-full">
-                                        <PerformanceAnalytics scoreTrend={dashboardData?.score_trend} />
+                                        <PerformanceAnalytics scoreTrend={dashboardData?.score_trend} loading={loading} />
                                     </div>
                                 </div>
 
@@ -83,8 +89,9 @@ export default function Dashboard({ setIsUser, isUser }) {
                                         positive={dashboardData?.last_interview_feedback?.strengths}
                                         negative={dashboardData?.last_interview_feedback?.weaknesses}
                                         score={dashboardData?.last_interview_feedback?.score}
+                                        loading={loading}
                                     />
-                                    <WeakAreas weakAreas={dashboardData?.weak_areas} />
+                                    <WeakAreas weakAreas={dashboardData?.weak_areas} loading={loading} />
                                 </div>
                             </div>
                             

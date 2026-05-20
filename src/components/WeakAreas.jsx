@@ -1,7 +1,51 @@
 import { useNavigate } from 'react-router-dom';
 
-export default function WeakAreas({ weakAreas }) {
+export default function WeakAreas({ weakAreas, loading = false }) {
     const navigate = useNavigate();
+
+    if (loading) {
+        return (
+            <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[220px] animate-pulse">
+                <div>
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700"></div>
+                        <div className="space-y-2">
+                            <div className="h-5 w-24 bg-slate-800 rounded"></div>
+                            <div className="h-3 w-32 bg-slate-800 rounded"></div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        {/* Skeleton Row 1 */}
+                        <div className="p-4 bg-[#0d1117]/50 border border-[#30363d] rounded-xl space-y-3">
+                            <div className="flex justify-between items-center">
+                                <div className="h-4 w-32 bg-slate-800 rounded"></div>
+                                <div className="h-3 w-16 bg-slate-800 rounded"></div>
+                            </div>
+                            <div className="h-3 w-48 bg-slate-800 rounded"></div>
+                            <div className="flex items-center gap-3">
+                                <div className="flex-grow bg-slate-800 h-1 rounded-full"></div>
+                                <div className="h-7 w-16 bg-slate-800 rounded-md shrink-0"></div>
+                            </div>
+                        </div>
+
+                        {/* Skeleton Row 2 */}
+                        <div className="p-4 bg-[#0d1117]/50 border border-[#30363d] rounded-xl space-y-3">
+                            <div className="flex justify-between items-center">
+                                <div className="h-4 w-28 bg-slate-800 rounded"></div>
+                                <div className="h-3 w-16 bg-slate-800 rounded"></div>
+                            </div>
+                            <div className="h-3 w-40 bg-slate-800 rounded"></div>
+                            <div className="flex items-center gap-3">
+                                <div className="flex-grow bg-slate-800 h-1 rounded-full"></div>
+                                <div className="h-7 w-16 bg-slate-800 rounded-md shrink-0"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     let displayAreas = [];
     let isMock = false;

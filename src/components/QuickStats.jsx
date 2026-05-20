@@ -1,4 +1,41 @@
-export default function QuickStats({ stats }) {
+export default function QuickStats({ stats, loading = false }) {
+    if (loading) {
+        return (
+            <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
+                {/* Interviews Taken Skeleton */}
+                <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 flex flex-col justify-between min-h-[200px]">
+                    <div className="h-4 w-32 bg-slate-800 rounded"></div>
+                    <div className="flex flex-col gap-3 mt-auto">
+                        <div className="h-10 w-16 bg-slate-800 rounded"></div>
+                        <div className="h-6 w-24 bg-slate-800 rounded"></div>
+                    </div>
+                </div>
+
+                {/* Average Score Skeleton */}
+                <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 flex flex-col justify-between min-h-[200px]">
+                    <div className="h-4 w-32 bg-slate-800 rounded"></div>
+                    <div className="flex flex-col gap-3 mt-auto">
+                        <div className="h-10 w-24 bg-slate-800 rounded"></div>
+                        <div className="h-6 w-20 bg-slate-800 rounded"></div>
+                    </div>
+                </div>
+
+                {/* Top Topics Skeleton */}
+                <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 flex flex-col justify-between min-h-[200px]">
+                    <div className="flex justify-between items-center">
+                        <div className="h-4 w-28 bg-slate-800 rounded"></div>
+                        <div className="h-5 w-20 bg-slate-800 rounded-full"></div>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-auto">
+                        <div className="h-8 w-16 bg-slate-800 rounded-lg"></div>
+                        <div className="h-8 w-20 bg-slate-800 rounded-lg"></div>
+                        <div className="h-8 w-16 bg-slate-800 rounded-lg"></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     const displayTaken = stats?.interviews_taken ?? 0;
     const displayThisWeek = stats?.interviews_this_week ?? 0;
     const displayAvg = stats?.average_score !== undefined ? stats.average_score : 0.0;
