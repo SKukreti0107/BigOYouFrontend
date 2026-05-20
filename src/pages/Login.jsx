@@ -207,7 +207,7 @@ function Login({ checkAuth }) {
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 mb-5">
                                 <span className="material-symbols-outlined text-indigo-400 text-sm">terminal</span>
                                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-300">
-                                    {isUser ? 'Engineer Login' : 'Create Account'}
+                                    {isUser ? 'Login' : 'Create Account'}
                                 </span>
                             </div>
                             <h1 className="text-3xl font-extrabold text-white tracking-tight leading-tight">
