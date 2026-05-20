@@ -55,19 +55,18 @@ export default function Dashboard({ setIsUser, isUser }) {
                         <div className="w-full xl:max-w-[1600px] mx-auto space-y-6">
                             
                             {/* Top row: Streak Card and Quick Stats */}
-                            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-                                <StreakCard />
-                                <QuickStats />
+                            <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+                                <div className="xl:col-span-2">
+                                    <StreakCard />
+                                </div>
+                                <div className="xl:col-span-3">
+                                    <QuickStats />
+                                </div>
                             </div>
 
-                            {/* Middle row: Feedback, Score Trend, Weak Areas */}
+                            {/* Middle row: Score Trend and Feedback */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                <LastInterviewFeedback
-                                    positive={dashboardData?.last_interview_feedback?.strengths}
-                                    negative={dashboardData?.last_interview_feedback?.weaknesses}
-                                />
-                                
-                                <div className="lg:col-span-1 bg-[#161b22] border border-[#30363d] rounded-2xl p-6">
+                                <div className="lg:col-span-2 bg-[#161b22] border border-[#30363d] rounded-2xl p-6">
                                     <div className="flex items-center justify-between mb-8">
                                         <div>
                                             <h3 className="font-bold text-lg">Score Trend</h3>
@@ -77,7 +76,15 @@ export default function Dashboard({ setIsUser, isUser }) {
                                     <PerformanceAnalytics></PerformanceAnalytics>
                                 </div>
 
-                                <WeakAreas />
+                                <div className="lg:col-span-1">
+                                    <LastInterviewFeedback
+                                        positive={dashboardData?.last_interview_feedback?.strengths}
+                                        negative={dashboardData?.last_interview_feedback?.weaknesses}
+                                        score={dashboardData?.last_interview_feedback?.score}
+                                    />
+                                </div>
+
+                                {/* <WeakAreas /> */}
                             </div>
                             
                         </div>

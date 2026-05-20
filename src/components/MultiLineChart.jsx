@@ -7,12 +7,12 @@ const mediumScores = [58, 62, 55, 68, 72, 75, 82];
 const hardScores = [35, 42, 38, 48, 55, 52, 65];
 const xLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7'];
 
-export default function PerformanceLineChart() {
+export default function PerformanceLineChart({ height = 360 }) {
     return (
         <Box
             sx={{
                 width: '100%',
-                height: 320,
+                height: height,
                 bgcolor: '#181a22',
                 borderRadius: 3,
                 p: 2,
