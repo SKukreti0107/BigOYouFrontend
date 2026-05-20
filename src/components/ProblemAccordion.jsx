@@ -68,14 +68,15 @@ export default function ProblemAccordion({ topic_deets }) {
                         <div className="mb-8">
                             <button
                                 onClick={startInterview}
-                                className="w-full py-3 px-6 rounded-lg bg-gradient-to-r from-[#137fec] to-[#0ea5e9] hover:from-[#1d82e6] hover:to-[#0284c7] text-white font-bold tracking-wide transition-all shadow-md shadow-[#137fec]/20 hover:shadow-lg hover:shadow-[#137fec]/40 hover:-translate-y-0.5"
+                                className="w-full py-3 px-6 rounded-lg bg-gradient-to-r from-[#137fec] to-[#0ea5e9] hover:from-[#1d82e6] hover:to-[#0284c7] text-white font-bold tracking-wide transition-all shadow-md shadow-[#137fec]/20 hover:shadow-lg hover:shadow-[#137fec]/40 hover:-translate-y-0.5 cursor-pointer"
                             >
                                 Start Random Interview
                             </button>
                         </div>
 
-                        {/* Completed & Remaining Columns */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 divide-y md:divide-y-0 md:divide-x divide-[#30363d]/50">
+                        {/* Completed, Suggested Reattempt & Remaining Columns */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 divide-y md:divide-y-0 md:divide-x divide-[#30363d]/30">
+                            
                             {/* Completed */}
                             <div className="pt-4 md:pt-0">
                                 <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-500 mb-4 flex items-center gap-2">
@@ -86,33 +87,64 @@ export default function ProblemAccordion({ topic_deets }) {
                                     {problems_list.map((p) =>
                                         p.is_completed ? (
                                             <li key={p.id} className="flex items-start gap-2 text-sm text-slate-300 bg-emerald-500/5 p-2 rounded-md border border-emerald-500/10 transition-colors hover:bg-emerald-500/10">
-                                                <span className="material-symbols-outlined text-[18px] text-emerald-500 shrink-0">check</span>
-                                                <span className="font-medium">{p.title}</span>
+                                                <span className="material-symbols-outlined text-[18px] text-emerald-500 shrink-0">check_circle</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-semibold text-slate-200">{p.title}</span>
+                                                    {p.score !== null && (
+                                                        <span className="text-[10px] text-emerald-400/80 font-mono mt-0.5">Scored: {p.score}%</span>
+                                                    )}
+                                                </div>
                                             </li>
                                         ) : null
                                     )}
                                     {!problems_list.some(p => p.is_completed) && (
-                                        <li className="text-sm text-slate-500 italic px-2 py-1">No problems completed yet.</li>
+                                        <li className="text-sm text-slate-500 italic px-2 py-1">No completed questions yet.</li>
+                                    )}
+                                </ul>
+                            </div>
+
+                            {/* Suggested Reattempt */}
+                            <div className="pt-6 md:pt-0 md:pl-6">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-rose-500 mb-4 flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-[16px]">restart_alt</span>
+                                    Suggested Reattempt
+                                </h4>
+                                <ul className="space-y-3">
+                                    {problems_list.map((p) =>
+                                        p.is_reattempt ? (
+                                            <li key={p.id} className="flex items-start gap-2 text-sm text-slate-300 bg-rose-500/5 p-2 rounded-md border border-rose-500/10 transition-colors hover:bg-rose-500/10">
+                                                <span className="material-symbols-outlined text-[18px] text-rose-500 shrink-0">error</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-semibold text-slate-200">{p.title}</span>
+                                                    {p.score !== null && (
+                                                        <span className="text-[10px] text-rose-400/80 font-mono mt-0.5">Scored: {p.score}%</span>
+                                                    )}
+                                                </div>
+                                            </li>
+                                        ) : null
+                                    )}
+                                    {!problems_list.some(p => p.is_reattempt) && (
+                                        <li className="text-sm text-slate-500 italic px-2 py-1">No reattempts suggested.</li>
                                     )}
                                 </ul>
                             </div>
 
                             {/* Remaining */}
-                            <div className="pt-6 md:pt-0 md:pl-8">
+                            <div className="pt-6 md:pt-0 md:pl-6">
                                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
                                     <span className="material-symbols-outlined text-[16px]">pending</span>
                                     Remaining Questions
                                 </h4>
                                 <ul className="space-y-3">
                                     {problems_list.map((p) =>
-                                        !p.is_completed ? (
+                                        (!p.is_completed && !p.is_reattempt) ? (
                                             <li key={p.id} className="flex items-start gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors p-2 rounded-md hover:bg-slate-800/50">
                                                 <span className="material-symbols-outlined text-[18px] text-slate-600 shrink-0">circle</span>
                                                 <span className="font-medium">{p.title}</span>
                                             </li>
                                         ) : null
                                     )}
-                                    {!problems_list.some(p => !p.is_completed) && (
+                                    {!problems_list.some(p => !p.is_completed && !p.is_reattempt) && (
                                         <li className="text-sm text-emerald-500 font-medium px-2 py-1">All conquered! 🎉</li>
                                     )}
                                 </ul>
