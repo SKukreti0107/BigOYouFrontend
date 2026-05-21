@@ -15,11 +15,13 @@ export default function InterviewRightSidebar({
     attachedSelection,
     selectionWasTruncated,
     onAttachSelection,
-    onClearSelection
+    onClearSelection,
+    loadingType
 }) {
     const [alignment, setAlignment] = React.useState('chat');
 
     const handleChange = (event, newAlignment) => {
+        if (!newAlignment) return;
         setAlignment(newAlignment);
     };
 
@@ -36,20 +38,23 @@ export default function InterviewRightSidebar({
                 <ToggleButton value="android">Notepad</ToggleButton>
             </ToggleButtonGroup>) : null}
             <div className="flex-1 min-h-0">
-                {alignment == "chat" ? (
-                    <AIChatWindow
-                        chat_messages={messages}
-                        curr_phase={phase}
-                        onSendUserMessage={handleSendUserMessage}
-                        canAttachSelection={canAttachSelection}
-                        attachedSelection={attachedSelection}
-                        selectionWasTruncated={selectionWasTruncated}
-                        onAttachSelection={onAttachSelection}
-                        onClearSelection={onClearSelection}
-                    ></AIChatWindow>
-                ) : (
-                    <Notepad session_id={session_id} onStartCoding={null} onSetMessage={handleAddMessage}></Notepad>
-                )}
+                <div key={alignment} className="h-full animate-fade-in-up">
+                    {alignment == "chat" ? (
+                        <AIChatWindow
+                            chat_messages={messages}
+                            curr_phase={phase}
+                            onSendUserMessage={handleSendUserMessage}
+                            canAttachSelection={canAttachSelection}
+                            attachedSelection={attachedSelection}
+                            selectionWasTruncated={selectionWasTruncated}
+                            onAttachSelection={onAttachSelection}
+                            onClearSelection={onClearSelection}
+                            loadingType={loadingType}
+                        ></AIChatWindow>
+                    ) : (
+                        <Notepad session_id={session_id} onStartCoding={null} onSetMessage={handleAddMessage}></Notepad>
+                    )}
+                </div>
             </div>
 
 

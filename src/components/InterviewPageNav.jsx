@@ -21,7 +21,7 @@ export default function InterviewPageNav({ curr_phase, onEndInterview }) {
             {phases.map((_, idx) => (
               <div
                 key={idx}
-                className={`w-6 h-1.5 rounded-full ${idx <= activeIndex ? "bg-primary" : "bg-border-dark"}`}
+                className={`h-1.5 rounded-full transition-all duration-200 ${idx <= activeIndex ? "bg-primary w-8" : "bg-border-dark w-6"}`}
               ></div>
             ))}
           </div>
