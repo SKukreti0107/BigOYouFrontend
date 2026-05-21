@@ -108,6 +108,11 @@ export default function InterviewPage() {
     return sessionStorage.getItem(STORAGE_KEY) ?? getStarterCode(language);
   });
 
+  const MAX_SELECTION_CHARS = 1500;
+  const [editorSelection, setEditorSelection] = useState("");
+  const [attachedSelection, setAttachedSelection] = useState("");
+  const [selectionWasTruncated, setSelectionWasTruncated] = useState(false);
+
   useEffect(() => {
     sessionStorage.setItem(STORAGE_KEY, code);
   }, [STORAGE_KEY, code]);
@@ -428,6 +433,9 @@ export default function InterviewPage() {
     handleAddMessage(message, "user");
 
     const notepadContent = sessionStorage.getItem(`interview.notepad.${sessionId}`) || "";
+    const selectionBlock = attachedSelection
+      ? `\n[SELECTED CODE]\n\`\`\`${language}\n${attachedSelection}\n\`\`\`\n`
+      : "";
 
     // Inject current context into the message sent to the backend
     const contextWrappedMessage = `
@@ -438,6 +446,7 @@ Current Implementation:
 \`\`\`${language}
 ${code}
 \`\`\`
+${selectionBlock}
 
 [USER MESSAGE]
 ${message}
@@ -469,12 +478,35 @@ ${message}
         handleAddMessage(res.data.response, "ai");
       }
       syncFromAgentResponse(res?.data);
+      if (attachedSelection) {
+        setAttachedSelection("");
+        setSelectionWasTruncated(false);
+      }
     } catch (error) {
       showError(error, "sending interview message");
     } finally {
       setLoadingType(null);
     }
   }
+
+  const handleAttachSelection = () => {
+    const trimmedSelection = editorSelection.trim();
+    if (!trimmedSelection) return;
+
+    if (editorSelection.length > MAX_SELECTION_CHARS) {
+      setAttachedSelection(editorSelection.slice(0, MAX_SELECTION_CHARS));
+      setSelectionWasTruncated(true);
+      return;
+    }
+
+    setAttachedSelection(editorSelection);
+    setSelectionWasTruncated(false);
+  };
+
+  const handleClearSelection = () => {
+    setAttachedSelection("");
+    setSelectionWasTruncated(false);
+  };
 
   return (
     <div className="bg-[#0d1117] text-slate-200 h-screen flex flex-col overflow-hidden relative">
@@ -579,13 +611,26 @@ ${message}
           <InterviewSidebar problem_deets={session?.problem} onRun={handleRun} curr_phase={phase} onDryRun={handleDryRun} onEndReview={handleFeedback} onTimeout={handleTimeout} extensionSeconds={timeoutState.extensionSeconds} hasRunCode={hasRunCode} loadingType={loadingType}></InterviewSidebar>
 
           <div className="flex-grow flex flex-col min-h-0">
-            {(phase == "PROBLEM_DISCUSSION") ? <Notepad session_id={sessionId} onStartCoding={handleStartCoding} onSetMessage={handleAddMessage} onAgentResponse={syncFromAgentResponse} curr_phase={phase} loadingType={loadingType} setLoadingType={setLoadingType}></Notepad> : (<><CodeEditor code={code} onChange={setCode} language={language} setLanguage={handleLanguageChange} curr_phase={phase}></CodeEditor>
+            {(phase == "PROBLEM_DISCUSSION") ? <Notepad session_id={sessionId} onStartCoding={handleStartCoding} onSetMessage={handleAddMessage} onAgentResponse={syncFromAgentResponse} curr_phase={phase} loadingType={loadingType} setLoadingType={setLoadingType}></Notepad> : (<><CodeEditor code={code} onChange={setCode} language={language} setLanguage={handleLanguageChange} curr_phase={phase} onSelectionChange={setEditorSelection}></CodeEditor>
               <TerminalOutput output={output}></TerminalOutput></>
             )
             }
           </div>
 
-          <InterviewRightSidebar session_id={sessionId} messages={messages} phase={phase} handleSendUserMessage={handleSendUserMessage} handleAddMessage={handleAddMessage} loadingType={loadingType} setLoadingType={setLoadingType}></InterviewRightSidebar>
+          <InterviewRightSidebar
+            session_id={sessionId}
+            messages={messages}
+            phase={phase}
+            handleSendUserMessage={handleSendUserMessage}
+            handleAddMessage={handleAddMessage}
+            canAttachSelection={editorSelection.trim().length > 0}
+            attachedSelection={attachedSelection}
+            selectionWasTruncated={selectionWasTruncated}
+            onAttachSelection={handleAttachSelection}
+            onClearSelection={handleClearSelection}
+            loadingType={loadingType}
+            setLoadingType={setLoadingType}
+          ></InterviewRightSidebar>
         </main>
       ) : (
         <main className="flex-grow flex overflow-hidden p-8 overflow-y-auto">

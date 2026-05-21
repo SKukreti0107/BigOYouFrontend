@@ -2,7 +2,16 @@ import AIChatMessage from "./AIChatMessage"
 import UserChatMessage from "./UserChatMessage"
 import AIChatHint from "./AIChatHint"
 import UserChatInput from "./UserChatInput"
-export default function AIChatWindow({ chat_messages, curr_phase, onSendUserMessage }) {
+export default function AIChatWindow({
+    chat_messages,
+    curr_phase,
+    onSendUserMessage,
+    canAttachSelection,
+    attachedSelection,
+    selectionWasTruncated,
+    onAttachSelection,
+    onClearSelection
+}) {
 
     const handleSendUserMessage = (message) => {
         if (onSendUserMessage) {
@@ -46,7 +55,14 @@ export default function AIChatWindow({ chat_messages, curr_phase, onSendUserMess
                 
             </div>
             <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800">
-                <UserChatInput onSendMessage={handleSendUserMessage}></UserChatInput>
+                <UserChatInput
+                    onSendMessage={handleSendUserMessage}
+                    canAttachSelection={canAttachSelection}
+                    attachedSelection={attachedSelection}
+                    selectionWasTruncated={selectionWasTruncated}
+                    onAttachSelection={onAttachSelection}
+                    onClearSelection={onClearSelection}
+                ></UserChatInput>
                 <div className="flex items-center justify-between mt-3 px-1">
                     <button className="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
                         <span className="material-symbols-outlined text-sm">help</span>

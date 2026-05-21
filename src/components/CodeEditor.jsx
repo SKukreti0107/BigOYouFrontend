@@ -1,14 +1,56 @@
 import Editor from "@monaco-editor/react";
+import { useCallback, useEffect, useRef } from "react";
 
 
 
-export default function CodeEditor({ code, onChange, language, setLanguage, curr_phase }) {
+export default function CodeEditor({ code, onChange, language, setLanguage, curr_phase, onSelectionChange }) {
+  const editorRef = useRef(null);
+  const selectionListenerRef = useRef(null);
 
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
   }
 
   const isReadOnly = curr_phase !== "CODING"
+
+  const getSelectedText = useCallback(() => {
+    const editor = editorRef.current;
+    if (!editor) return "";
+    const model = editor.getModel();
+    if (!model) return "";
+
+    const selections = editor.getSelections() || [];
+    const chunks = selections
+      .map((selection) => model.getValueInRange(selection))
+      .map((text) => text.trimEnd())
+      .filter((text) => text.length > 0);
+
+    return chunks.join("\n\n");
+  }, []);
+
+  const handleEditorMount = useCallback((editorInstance) => {
+    editorRef.current = editorInstance;
+
+    if (selectionListenerRef.current) {
+      selectionListenerRef.current.dispose();
+      selectionListenerRef.current = null;
+    }
+
+    selectionListenerRef.current = editorInstance.onDidChangeCursorSelection(() => {
+      if (onSelectionChange) {
+        onSelectionChange(getSelectedText());
+      }
+    });
+  }, [getSelectedText, onSelectionChange]);
+
+  useEffect(() => {
+    return () => {
+      if (selectionListenerRef.current) {
+        selectionListenerRef.current.dispose();
+        selectionListenerRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     
@@ -36,6 +78,7 @@ export default function CodeEditor({ code, onChange, language, setLanguage, curr
         theme="vs-dark"
         value={code}
         onChange={(value) => onChange(value || "")}
+        onMount={handleEditorMount}
         options={{
           fontSize: 14,
           minimap: { enabled: false },

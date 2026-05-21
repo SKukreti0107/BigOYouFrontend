@@ -5,7 +5,18 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 
-export default function InterviewRightSidebar({ session_id,messages, phase, handleSendUserMessage, handleAddMessage }) {
+export default function InterviewRightSidebar({
+    session_id,
+    messages,
+    phase,
+    handleSendUserMessage,
+    handleAddMessage,
+    canAttachSelection,
+    attachedSelection,
+    selectionWasTruncated,
+    onAttachSelection,
+    onClearSelection
+}) {
     const [alignment, setAlignment] = React.useState('chat');
 
     const handleChange = (event, newAlignment) => {
@@ -26,7 +37,16 @@ export default function InterviewRightSidebar({ session_id,messages, phase, hand
             </ToggleButtonGroup>) : null}
             <div className="flex-1 min-h-0">
                 {alignment == "chat" ? (
-                    <AIChatWindow chat_messages={messages} curr_phase={phase} onSendUserMessage={handleSendUserMessage}></AIChatWindow>
+                    <AIChatWindow
+                        chat_messages={messages}
+                        curr_phase={phase}
+                        onSendUserMessage={handleSendUserMessage}
+                        canAttachSelection={canAttachSelection}
+                        attachedSelection={attachedSelection}
+                        selectionWasTruncated={selectionWasTruncated}
+                        onAttachSelection={onAttachSelection}
+                        onClearSelection={onClearSelection}
+                    ></AIChatWindow>
                 ) : (
                     <Notepad session_id={session_id} onStartCoding={null} onSetMessage={handleAddMessage}></Notepad>
                 )}
