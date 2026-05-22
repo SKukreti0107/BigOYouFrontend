@@ -18,6 +18,9 @@ export default function InterviewFeedback({ feedback, reference: propReference }
     const [statusText, setStatusText] = useState("Initializing report parser...");
     const [isUnpacking, setIsUnpacking] = useState(false);
     const [hasTriggered, setHasTriggered] = useState(false);
+    const [activeTab, setActiveTab] = useState('overview');
+    const [copied, setCopied] = useState(false);
+
 
     const sessionId = data?.session_summary?.session_id || 'default';
     const sessionKey = `interview.unpacked.${sessionId}`;
@@ -215,51 +218,92 @@ export default function InterviewFeedback({ feedback, reference: propReference }
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
+    const handleCopyCode = () => {
+        if (reference?.pseudocode) {
+            navigator.clipboard.writeText(reference.pseudocode);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
+
     // Helper for score color
     const getScoreColor = (score) => {
-        if (score >= 8) return "text-emerald-400";
-        if (score >= 5) return "text-amber-400";
+        const num = parseFloat(score) || 0;
+        const normalized = num <= 10 ? num : num / 10;
+        if (normalized >= 8) return "text-emerald-400";
+        if (normalized >= 5) return "text-amber-400";
         return "text-red-400";
     };
 
     const getScoreBg = (score) => {
-        if (score >= 8) return "bg-emerald-500";
-        if (score >= 5) return "bg-amber-500";
+        const num = parseFloat(score) || 0;
+        const normalized = num <= 10 ? num : num / 10;
+        if (normalized >= 8) return "bg-emerald-500";
+        if (normalized >= 5) return "bg-amber-500";
         return "bg-red-500";
     };
 
     const getScoreBorder = (score) => {
-        if (score >= 8) return "border-emerald-500/30 bg-emerald-500/10";
-        if (score >= 5) return "border-amber-500/30 bg-amber-500/10";
-        return "border-red-500/30 bg-red-500/10";
+        const num = parseFloat(score) || 0;
+        const normalized = num <= 10 ? num : num / 10;
+        if (normalized >= 8) return "border-emerald-500/20 bg-emerald-500/5";
+        if (normalized >= 5) return "border-amber-500/20 bg-amber-500/5";
+        return "border-red-500/20 bg-red-500/5";
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
+        <div className="max-w-6xl mx-auto space-y-8 animate-fade-in select-none">
             {/* Hero Section */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#137fec]/20 to-emerald-500/10 border border-[#137fec]/20 p-8">
+            <div className="relative overflow-hidden rounded-2xl border border-white/5 glass-panel p-8">
+                {/* Visual Accent Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-emerald-500/5 pointer-events-none"></div>
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-center gap-6">
-                        <div className={`w-24 h-24 rounded-full border-4 flex items-center justify-center ${getScoreBorder(session_summary.overall_score)}`}>
-                            <div className="text-center">
-                                <span className={`block text-3xl font-bold ${getScoreColor(session_summary.overall_score)}`}>{session_summary.overall_score}</span>
-                                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Score</span>
+                        {/* Circular Progress Gauge */}
+                        <div className="relative w-24 h-24 flex items-center justify-center shrink-0 select-none">
+                            <svg className="w-full h-full transform -rotate-90">
+                                <circle
+                                    cx="48"
+                                    cy="48"
+                                    r="38"
+                                    stroke="rgba(255, 255, 255, 0.05)"
+                                    strokeWidth="6"
+                                    fill="transparent"
+                                />
+                                <circle
+                                    cx="48"
+                                    cy="48"
+                                    r="38"
+                                    stroke="currentColor"
+                                    strokeWidth="6"
+                                    strokeLinecap="round"
+                                    fill="transparent"
+                                    strokeDasharray={2 * Math.PI * 38}
+                                    strokeDashoffset={2 * Math.PI * 38 * (1 - (parseFloat(session_summary.overall_score) <= 10 ? parseFloat(session_summary.overall_score) * 10 : parseFloat(session_summary.overall_score)) / 100)}
+                                    className={`transition-all duration-500 ${getScoreColor(session_summary.overall_score)}`}
+                                />
+                            </svg>
+                            <div className="absolute text-center">
+                                <span className={`block text-3xl font-extrabold font-mono tracking-tighter ${getScoreColor(session_summary.overall_score)}`}>
+                                    {session_summary.overall_score}
+                                </span>
+                                <span className="text-[8px] text-slate-500 uppercase font-bold tracking-widest block -mt-0.5">Score</span>
                             </div>
                         </div>
                         <div>
-                            <h2 className="text-3xl font-bold text-white mb-1 tracking-tight">{session_summary.performance_label}</h2>
+                            <h2 className="text-3xl font-bold text-white mb-1.5 tracking-tight">{session_summary.performance_label}</h2>
                             <p className="text-slate-400 text-sm max-w-xl leading-relaxed">
                                 {data.response || final_verdict.summary}
                             </p>
                         </div>
                     </div>
                     <div className="flex gap-4">
-                        <div className="bg-[#0d1117]/50 rounded-xl px-5 py-3 border border-[#30363d]">
-                            <span className="block text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">Time Spent</span>
-                            <span className="text-xl font-mono text-white">{formatTime(session_summary.time_spent_seconds)}</span>
+                        <div className="bg-white/[0.02] border border-white/5 rounded-xl px-5 py-3 select-none text-center min-w-[110px]">
+                            <span className="block text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Time Spent</span>
+                            <span className="text-xl font-mono font-bold text-white">{formatTime(session_summary.time_spent_seconds)}</span>
                         </div>
-                        <div className="bg-[#0d1117]/50 rounded-xl px-5 py-3 border border-[#30363d]">
-                            <span className="block text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-1">Difficulty</span>
+                        <div className="bg-white/[0.02] border border-white/5 rounded-xl px-5 py-3 select-none text-center min-w-[110px]">
+                            <span className="block text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Difficulty</span>
                             <span className="text-xl font-bold text-amber-500">{session_summary.difficulty}</span>
                         </div>
                     </div>
@@ -267,167 +311,237 @@ export default function InterviewFeedback({ feedback, reference: propReference }
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column: Strengths / Detailed Feedback */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 rounded-lg bg-[#137fec]/10 text-[#137fec] flex items-center justify-center">
-                                <span className="material-symbols-outlined">psychology</span>
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-lg text-slate-200">AI Feedback Summary</h3>
-                                <p className="text-xs text-slate-500">Deep-dive analysis of your interview session</p>
-                            </div>
-                        </div>
+                {/* Left Column: Tabbed Workspace */}
+                <div className="lg:col-span-2 flex flex-col border border-white/5 glass-panel rounded-2xl overflow-hidden min-h-[500px]">
+                    {/* Tab Navigation Header */}
+                    <div className="flex border-b border-white/5 bg-white/[0.01] px-4 pt-3 gap-2 select-none shrink-0">
+                        {[
+                            { id: 'overview', label: 'AI Overview', icon: 'psychology' },
+                            { id: 'metrics', label: 'Metrics & Benchmarks', icon: 'analytics' },
+                            { id: 'reference', label: 'Reference Solution', icon: 'menu_book' }
+                        ].map((tab) => {
+                            const isActive = activeTab === tab.id;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider rounded-t-xl border-t border-x transition-all duration-300 cursor-pointer relative ${
+                                        isActive
+                                            ? 'border-white/5 bg-[#0d1117]/40 text-[#137fec] -mb-[1px]'
+                                            : 'border-transparent text-slate-500 hover:text-slate-300'
+                                    }`}
+                                >
+                                    <span className="material-symbols-outlined text-base">{tab.icon}</span>
+                                    {tab.label}
+                                    {isActive && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#137fec] to-emerald-500 rounded-full"></div>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
 
-                        <div className="space-y-6">
-                            {strengths && strengths.length > 0 ? (
-                                <div>
-                                    <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2 mb-3">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                        Strengths & Highlights
-                                    </h4>
-                                    <ul className="space-y-3 ml-3.5">
-                                        {strengths.map((strength, idx) => (
-                                            <li key={idx} className="text-sm text-slate-400 flex gap-2">
-                                                <span className="material-symbols-outlined text-emerald-500 text-base shrink-0">check_circle</span>
-                                                <span>
-                                                    <strong className="text-slate-300 block mb-0.5">{strength.title}</strong>
-                                                    {strength.description}
-                                                </span>
-                                            </li>
-                                        ))}
-                                    </ul>
+                    {/* Tab Content Panel */}
+                    <div className="p-6 flex-1 bg-white/[0.01]">
+                        {activeTab === 'overview' && (
+                            <div className="space-y-6 animate-fade-in">
+                                <div className="flex items-center gap-3 pb-4 border-b border-white/5">
+                                    <div className="w-10 h-10 rounded-lg bg-[#137fec]/10 text-[#137fec] flex items-center justify-center border border-[#137fec]/20">
+                                        <span className="material-symbols-outlined">psychology</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-lg text-slate-200">AI Feedback Summary</h3>
+                                        <p className="text-xs text-slate-500">Deep-dive analysis of your interview session</p>
+                                    </div>
                                 </div>
-                            ) : (
-                                <div className="text-slate-500 italic text-sm text-center py-4">No specific strengths detected in this session.</div>
-                            )}
 
-                            {/* Using scores grouping for additional context if needed, or just keeping it simple per mock */}
-                            {Object.entries(scores || {}).map(([key, val]) => (
-                                val.notes && val.score > 0 && (
-                                    <div key={key}>
-                                        <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2 mb-3 capitalize">
-                                            <span className={`w-1.5 h-1.5 rounded-full ${val.score >= 5 ? 'bg-[#137fec]' : 'bg-amber-500'}`}></span>
-                                            {key.replace('_', ' ')}
+                                <div className="space-y-6 pt-2">
+                                    {strengths && strengths.length > 0 ? (
+                                        <div>
+                                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                Strengths & Highlights
+                                            </h4>
+                                            <ul className="space-y-3">
+                                                {strengths.map((strength, idx) => (
+                                                    <li key={idx} className="text-sm text-slate-400 flex gap-3 p-3 bg-white/[0.01] border border-white/5 rounded-xl">
+                                                        <span className="material-symbols-outlined text-emerald-500 text-lg shrink-0">check_circle</span>
+                                                        <span>
+                                                            <strong className="text-slate-300 block mb-0.5">{strength.title}</strong>
+                                                            {strength.description}
+                                                        </span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ) : (
+                                        <div className="text-slate-500 italic text-sm text-center py-4">No specific strengths detected in this session.</div>
+                                    )}
+
+                                    {/* Using scores grouping for additional context if needed */}
+                                    <div className="space-y-3 pt-2">
+                                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[#137fec]"></span>
+                                            Detailed Category Rubric
                                         </h4>
-                                        <p className="text-sm text-slate-400 ml-3.5">{val.notes}</p>
-                                    </div>
-                                )
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Key Metrics - Moved here to match width of left col in mock or potentially keep as grid */}
-                    <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                                <span className="material-symbols-outlined">analytics</span>
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-lg text-slate-200">Key Metrics</h3>
-                                <p className="text-xs text-slate-500">Performance comparison vs optimal benchmarks</p>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <MetricCard
-                                title="Runtime Complexity"
-                                value={key_metrics?.runtime_complexity?.value || "N/A"}
-                                status={key_metrics?.runtime_complexity?.status}
-                                type="text"
-                            />
-                            <MetricCard
-                                title="Memory Efficiency"
-                                value={key_metrics?.memory_efficiency?.value || "N/A"}
-                                status={key_metrics?.memory_efficiency?.status}
-                                type="text"
-                            />
-                            <MetricCard
-                                title="Coding Speed"
-                                value={key_metrics?.coding_speed_percentile ? `Top ${100 - key_metrics.coding_speed_percentile}%` : "N/A"}
-                                subValue={key_metrics?.coding_speed_percentile ? `${key_metrics.coding_speed_percentile}th Percentile` : ""}
-                                status={key_metrics?.coding_speed_percentile > 50 ? "optimal" : "needs_improvement"}
-                                type="bar"
-                                progress={key_metrics?.coding_speed_percentile}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Reference Solution */}
-                    {reference && (
-                        <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center border border-violet-500/20">
-                                    <span className="material-symbols-outlined">menu_book</span>
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-lg text-slate-200">Reference Solution</h3>
-                                    <p className="text-xs text-slate-500">Optimal approach and key insights</p>
-                                </div>
-                            </div>
-
-                            {/* Optimal Approach */}
-                            <div className="mb-5">
-                                <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2 mb-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
-                                    Optimal Approach
-                                </h4>
-                                <p className="text-sm text-slate-400 leading-relaxed ml-3.5 whitespace-pre-line">{reference.optimal_approach}</p>
-                            </div>
-
-                            {/* Complexity badges */}
-                            <div className="flex gap-3 mb-5">
-                                <div className="flex-1 bg-[#0d1117]/50 border border-[#30363d] rounded-xl p-3 text-center">
-                                    <span className="block text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Time</span>
-                                    <span className="text-sm font-mono font-bold text-emerald-400">{reference.time_complexity}</span>
-                                </div>
-                                <div className="flex-1 bg-[#0d1117]/50 border border-[#30363d] rounded-xl p-3 text-center">
-                                    <span className="block text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Space</span>
-                                    <span className="text-sm font-mono font-bold text-[#137fec]">{reference.space_complexity}</span>
-                                </div>
-                            </div>
-
-                            {/* Key Insights */}
-                            <div className="mb-5">
-                                <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2 mb-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                    Key Insights
-                                </h4>
-                                <p className="text-sm text-slate-400 leading-relaxed ml-3.5 whitespace-pre-line">{reference.key_insights}</p>
-                            </div>
-
-                            {/* Common Pitfalls */}
-                            {reference.common_pitfalls && (
-                                <div className="mb-5">
-                                    <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2 mb-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                                        Common Pitfalls
-                                    </h4>
-                                    <div className="ml-3.5 p-3 bg-rose-500/5 border border-rose-500/10 rounded-lg">
-                                        <p className="text-sm text-rose-300/70 leading-relaxed whitespace-pre-line">{reference.common_pitfalls}</p>
+                                        {Object.entries(scores || {}).map(([key, val]) => (
+                                            val.notes && val.score > 0 && (
+                                                <div key={key} className="p-4 rounded-xl bg-white/[0.01] border border-white/5 relative overflow-hidden group hover:bg-white/[0.02] transition-all duration-300">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2 capitalize">
+                                                            <span className={`w-2 h-2 rounded-full ${val.score >= 8 ? 'bg-emerald-500' : val.score >= 5 ? 'bg-amber-500' : 'bg-rose-500'}`}></span>
+                                                            {key.replace('_', ' ')}
+                                                        </h4>
+                                                        <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded border ${
+                                                            val.score >= 8
+                                                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                                                : val.score >= 5
+                                                                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                                                    : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                                                        }`}>
+                                                            {val.score} / 10
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-xs text-slate-400 leading-relaxed ml-4">{val.notes}</p>
+                                                </div>
+                                            )
+                                        ))}
                                     </div>
                                 </div>
-                            )}
+                            </div>
+                        )}
 
-                            {/* Pseudocode */}
-                            {reference.pseudocode && (
-                                <div>
-                                    <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2 mb-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#137fec]"></span>
-                                        Pseudocode
-                                    </h4>
-                                    <pre className="ml-3.5 p-4 bg-[#0d1117] border border-[#30363d] rounded-xl text-xs text-slate-300 font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap">{reference.pseudocode}</pre>
+                        {activeTab === 'metrics' && (
+                            <div className="space-y-6 animate-fade-in">
+                                <div className="flex items-center gap-3 pb-4 border-b border-white/5">
+                                    <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20">
+                                        <span className="material-symbols-outlined">analytics</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-lg text-slate-200">Key Metrics</h3>
+                                        <p className="text-xs text-slate-500">Performance comparison vs optimal benchmarks</p>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
-                    )}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                                    <MetricCard
+                                        title="Runtime Complexity"
+                                        value={key_metrics?.runtime_complexity?.value || "N/A"}
+                                        status={key_metrics?.runtime_complexity?.status}
+                                        type="text"
+                                    />
+                                    <MetricCard
+                                        title="Memory Efficiency"
+                                        value={key_metrics?.memory_efficiency?.value || "N/A"}
+                                        status={key_metrics?.memory_efficiency?.status}
+                                        type="text"
+                                    />
+                                    <MetricCard
+                                        title="Coding Speed"
+                                        value={key_metrics?.coding_speed_percentile ? `Top ${100 - key_metrics.coding_speed_percentile}%` : "N/A"}
+                                        subValue={key_metrics?.coding_speed_percentile ? `${key_metrics.coding_speed_percentile}th Percentile` : ""}
+                                        status={key_metrics?.coding_speed_percentile > 50 ? "optimal" : "needs_improvement"}
+                                        type="bar"
+                                        progress={key_metrics?.coding_speed_percentile}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'reference' && reference && (
+                            <div className="space-y-6 animate-fade-in">
+                                <div className="flex items-center gap-3 pb-4 border-b border-white/5">
+                                    <div className="w-10 h-10 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center border border-violet-500/20">
+                                        <span className="material-symbols-outlined">menu_book</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-lg text-slate-200">Reference Solution</h3>
+                                        <p className="text-xs text-slate-500">Optimal approach and key insights</p>
+                                    </div>
+                                </div>
+
+                                {/* Approach Description & Complexity Badges */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+                                    <div className="md:col-span-2 space-y-4">
+                                        <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5">
+                                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-sm text-violet-400">explore</span>
+                                                Optimal Strategy
+                                            </h4>
+                                            <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line">{reference.optimal_approach}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex-1 bg-white/[0.01] border border-white/5 rounded-xl p-3.5 flex flex-col justify-center items-center">
+                                            <span className="block text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Time Complexity</span>
+                                            <span className="text-sm font-mono font-extrabold text-emerald-400">{reference.time_complexity}</span>
+                                        </div>
+                                        <div className="flex-1 bg-white/[0.01] border border-white/5 rounded-xl p-3.5 flex flex-col justify-center items-center">
+                                            <span className="block text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-1">Space Complexity</span>
+                                            <span className="text-sm font-mono font-extrabold text-[#137fec]">{reference.space_complexity}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Key Insights & Pitfalls */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5">
+                                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-sm text-amber-400">lightbulb</span>
+                                            Key Insights
+                                        </h4>
+                                        <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line">{reference.key_insights}</p>
+                                    </div>
+
+                                    {reference.common_pitfalls && (
+                                        <div className="p-4 rounded-xl bg-rose-500/[0.01] border border-rose-500/10">
+                                            <h4 className="text-xs font-bold text-rose-300/80 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-sm text-rose-400">error</span>
+                                                Common Pitfalls
+                                            </h4>
+                                            <p className="text-xs text-rose-200/70 leading-relaxed whitespace-pre-line">{reference.common_pitfalls}</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Code Block Mock IDE */}
+                                {reference.pseudocode && (
+                                    <div className="space-y-2">
+                                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-sm text-[#137fec]">code</span>
+                                            Optimal Reference Code
+                                        </h4>
+                                        <div className="border border-white/5 bg-[#080b11]/80 rounded-2xl overflow-hidden shadow-2xl relative">
+                                            {/* Header Mock bar */}
+                                            <div className="flex items-center justify-between px-4 py-2.5 bg-[#0d1117]/80 border-b border-white/5 select-none">
+                                                <div className="flex items-center gap-1.5">
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80"></div>
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
+                                                    <span className="text-[10px] text-slate-400 ml-2 font-mono">solution.py</span>
+                                                </div>
+                                                <button
+                                                    onClick={handleCopyCode}
+                                                    className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-slate-400 hover:text-white rounded bg-white/5 border border-white/5 hover:bg-white/10 transition-all cursor-pointer"
+                                                >
+                                                    <span className="material-symbols-outlined text-[13px]">{copied ? 'done' : 'content_copy'}</span>
+                                                    {copied ? 'Copied!' : 'Copy'}
+                                                </button>
+                                            </div>
+                                            {/* Code Display */}
+                                            <pre className="p-4 text-[11px] text-slate-300 font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap max-h-[300px] overflow-y-auto custom-scrollbar">{reference.pseudocode}</pre>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Right Column: Improvement Plan */}
                 <div className="space-y-6">
-                    <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 sticky top-6">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                    <div className="border border-white/5 glass-panel p-6 rounded-2xl sticky top-6 shadow-xl flex flex-col gap-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center border border-amber-500/20">
                                 <span className="material-symbols-outlined">trending_up</span>
                             </div>
                             <div>
@@ -435,40 +549,60 @@ export default function InterviewFeedback({ feedback, reference: propReference }
                                 <p className="text-xs text-slate-500">Targeted study recommendations</p>
                             </div>
                         </div>
+
                         <div className="space-y-4">
                             {weaknesses && weaknesses.length > 0 ? (
                                 weaknesses.slice(0, 4).map((weakness, idx) => (
-                                    <div key={idx} className="p-4 bg-[#0d1117]/50 border border-[#30363d] rounded-xl">
+                                    <div key={idx} className="p-4 bg-white/[0.01] border border-white/5 rounded-xl hover:bg-white/[0.02] transition-all duration-300">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <span className="material-symbols-outlined text-sm text-amber-500">warning</span>
-                                            <h4 className="text-sm font-bold text-slate-200 uppercase tracking-wide">{weakness.category}</h4>
+                                            <span className="material-symbols-outlined text-base text-amber-500 animate-pulse">warning</span>
+                                            <h4 className="text-[10px] font-extrabold text-slate-200 uppercase tracking-wider">{weakness.category}</h4>
                                         </div>
-                                        <p className="text-xs text-slate-400 leading-relaxed mb-3">
+                                        <p className="text-xs text-slate-400 leading-relaxed">
                                             <strong className="block text-slate-300 mb-1">{weakness.title}</strong>
                                             {weakness.description}
                                         </p>
                                     </div>
                                 ))
                             ) : (
-                                <div className="p-4 bg-[#0d1117]/50 border border-[#30363d] rounded-xl text-center text-slate-500 text-sm">
+                                <div className="p-4 bg-white/[0.01] border border-white/5 rounded-xl text-center text-slate-500 text-sm">
                                     No critical weaknesses identified. Great job!
                                 </div>
                             )}
                         </div>
 
-                        <div className="mt-8 pt-6 border-t border-[#30363d]">
-                            <h4 className="text-sm font-bold text-slate-200 mb-2">Final Verdict</h4>
-                            <div className={`p-3 rounded-lg border text-center font-bold ${final_verdict.decision === "No Hire" ? "bg-red-500/10 text-red-400 border-red-500/20" :
-                                    final_verdict.decision === "Hire" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                                        "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                                }`}>
-                                {final_verdict.decision}
-                            </div>
+                        <div className="pt-4 border-t border-white/5">
+                            <h4 className="text-xs font-extrabold text-slate-500 uppercase tracking-widest block mb-3 text-center">Final Verdict</h4>
+                            {final_verdict.decision === "No Hire" ? (
+                                <div className="bg-rose-500/5 text-rose-400 border border-rose-500/20 py-3.5 rounded-xl text-center font-mono font-extrabold uppercase tracking-widest text-xs relative overflow-hidden shadow-[0_0_15px_rgba(244,63,94,0.05)] select-none">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                                    </span>
+                                    {final_verdict.decision}
+                                </div>
+                            ) : final_verdict.decision === "Hire" || final_verdict.decision === "Strong Hire" ? (
+                                <div className="bg-emerald-500/5 text-emerald-400 border border-emerald-500/20 py-3.5 rounded-xl text-center font-mono font-extrabold uppercase tracking-widest text-xs relative overflow-hidden shadow-[0_0_15px_rgba(16,185,129,0.05)] select-none">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                    </span>
+                                    {final_verdict.decision}
+                                </div>
+                            ) : (
+                                <div className="bg-amber-500/5 text-amber-400 border border-amber-500/20 py-3.5 rounded-xl text-center font-mono font-extrabold uppercase tracking-widest text-xs relative overflow-hidden shadow-[0_0_15px_rgba(245,158,11,0.05)] select-none">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                    </span>
+                                    {final_verdict.decision}
+                                </div>
+                            )}
                         </div>
 
                         <button
                             onClick={() => window.location.href = '/dashboard'}
-                            className="w-full mt-4 py-3 bg-[#137fec] hover:bg-[#137fec]/90 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-[#137fec]/20"
+                            className="w-full py-3 bg-gradient-to-r from-[#137fec] to-blue-500 hover:from-[#137fec]/90 hover:to-blue-500/90 text-white rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#137fec]/20 active:translate-y-0 cursor-pointer"
                         >
                             Return to Dashboard
                         </button>
@@ -480,27 +614,53 @@ export default function InterviewFeedback({ feedback, reference: propReference }
 }
 
 function MetricCard({ title, value, subValue, status, type, progress }) {
-    let colorClass = "text-[#137fec]";
-    let barColor = "bg-[#137fec]";
+    let colorClass = "text-primary";
+    let barColor = "from-[#137fec] to-blue-400";
+    let borderClass = "border-white/5";
+    let bgGlow = "bg-primary/5";
+    let icon = "info";
 
-    if (status === "optimal" || (typeof progress === 'number' && progress > 70)) {
+    if (title.toLowerCase().includes("runtime")) {
+        icon = "schedule";
+    } else if (title.toLowerCase().includes("memory")) {
+        icon = "memory";
+    } else if (title.toLowerCase().includes("speed")) {
+        icon = "speed";
+    }
+
+    if (status === "optimal" || (typeof progress === 'number' && progress >= 70)) {
         colorClass = "text-emerald-400";
-        barColor = "bg-emerald-500";
+        barColor = "from-emerald-500 to-teal-400";
+        borderClass = "border-emerald-500/10";
+        bgGlow = "bg-emerald-500/5";
     } else if (status === "needs_improvement" || (typeof progress === 'number' && progress < 40)) {
         colorClass = "text-amber-400";
-        barColor = "bg-amber-500";
+        barColor = "from-amber-500 to-orange-400";
+        borderClass = "border-amber-500/10";
+        bgGlow = "bg-amber-500/5";
     }
 
     return (
-        <div className="bg-gradient-to-br from-[#161b22] to-[#0d1117] p-4 border border-[#30363d] rounded-xl">
-            <span className="block text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-2">{title}</span>
-            <div className="flex items-end gap-2 mb-2">
-                <span className={`text-xl font-mono ${colorClass}`}>{value}</span>
-                {subValue && <span className="text-[10px] text-slate-500 mb-1">{subValue}</span>}
+        <div className={`bg-white/[0.01] backdrop-blur-xl p-5 border ${borderClass} rounded-2xl relative overflow-hidden group hover:bg-white/[0.02] hover:border-white/10 transition-all duration-300 shadow-lg`}>
+            {/* Soft decorative background glow */}
+            <div className={`absolute -right-8 -top-8 w-20 h-20 rounded-full ${bgGlow} blur-xl pointer-events-none group-hover:scale-125 transition-transform duration-500`}></div>
+            
+            <div className="flex justify-between items-start mb-4">
+                <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">{title}</span>
+                <span className="material-symbols-outlined text-slate-600 text-lg">{icon}</span>
             </div>
+
+            <div className="flex items-baseline gap-2">
+                <span className={`text-2xl font-mono font-extrabold tracking-tight ${colorClass}`}>{value}</span>
+                {subValue && <span className="text-[10px] text-slate-500 font-medium mb-0.5">{subValue}</span>}
+            </div>
+
             {type === "bar" && (
-                <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2">
-                    <div className={`${barColor} h-full rounded-full`} style={{ width: `${progress}%` }}></div>
+                <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden mt-4 relative">
+                    <div 
+                        className={`bg-gradient-to-r ${barColor} h-full rounded-full transition-all duration-1000 ease-out`} 
+                        style={{ width: `${progress}%` }}
+                    ></div>
                 </div>
             )}
         </div>

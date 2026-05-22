@@ -1,7 +1,7 @@
 import NavBarHome from '../components/NavBarHome'
 import BottomFooter from '../components/BottomFooter'
 import Hero from '../components/Hero'
-import HomeStats from '../components/HomeStats'
+import HomeFeatures from '../components/HomeFeatures'
 import Workflow from '../components/Workflow'
 
 
@@ -11,7 +11,7 @@ function Home() {
             <NavBarHome></NavBarHome>
             <main>
                 <Hero></Hero>
-                <HomeStats></HomeStats>
+                <HomeFeatures></HomeFeatures>
                 <Workflow></Workflow>
                 
             </main>

@@ -1,10 +1,9 @@
 import InterviewSidebar from "../components/InterviewSidebar"
-import CodeEditor from "../components/CodeEditor"
+import UnifiedWorkspace from "../components/UnifiedWorkspace"
 import TerminalOutput from "../components/TerminalOutpur"
 import InterviewPageNav from "../components/InterviewPageNav"
 import InterviewFeedback from "../components/InterviewFeedback"
 import InterviewRightSidebar from "../components/InterviewRightSidebar"
-import Notepad from "../components/Notepad"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { useState, useEffect, useCallback, useRef } from "react"
 import api from "../components/Api"
@@ -151,6 +150,31 @@ export default function InterviewPage() {
       return stored ? JSON.parse(stored) : null;
     } catch { return null; }
   });
+
+  const REFERENCE_KEY = `interview.reference.${sessionId}`;
+  const [reference, setReference] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem(REFERENCE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch { return null; }
+  });
+
+  useEffect(() => {
+    const fetchReference = async () => {
+      if (phase === "FEEDBACK" && sessionId && !reference) {
+        try {
+          const res = await api.get(`/admin/reference/by-session/${sessionId}`);
+          if (res?.data?.reference) {
+            setReference(res.data.reference);
+            sessionStorage.setItem(REFERENCE_KEY, JSON.stringify(res.data.reference));
+          }
+        } catch (err) {
+          console.error("Failed to load reference solution:", err);
+        }
+      }
+    };
+    fetchReference();
+  }, [phase, sessionId, reference, REFERENCE_KEY]);
 
   const [output, setOutput] = useState("");
   const [hasRunCode, setHasRunCode] = useState(false);
@@ -623,10 +647,20 @@ ${message}
           <InterviewSidebar problem_deets={session?.problem} onRun={handleRun} curr_phase={phase} onDryRun={handleDryRun} onEndReview={handleFeedback} onTimeout={handleTimeout} extensionSeconds={timeoutState.extensionSeconds} hasRunCode={hasRunCode} loadingType={loadingType}></InterviewSidebar>
 
           <div className="flex-grow flex flex-col min-h-0">
-            {(phase == "PROBLEM_DISCUSSION") ? <Notepad session_id={sessionId} onStartCoding={handleStartCoding} onSetMessage={handleAddMessage} onAgentResponse={syncFromAgentResponse} curr_phase={phase} loadingType={loadingType} setLoadingType={setLoadingType}></Notepad> : (<><CodeEditor code={code} onChange={setCode} language={language} setLanguage={handleLanguageChange} curr_phase={phase} onSelectionChange={setEditorSelection}></CodeEditor>
-              <TerminalOutput output={output}></TerminalOutput></>
-            )
-            }
+            <UnifiedWorkspace
+              session_id={sessionId}
+              curr_phase={phase}
+              code={code}
+              onChangeCode={setCode}
+              language={language}
+              onChangeLanguage={handleLanguageChange}
+              onSelectionChange={setEditorSelection}
+              loadingType={loadingType}
+              setLoadingType={setLoadingType}
+              onSetMessage={handleAddMessage}
+              onAgentResponse={syncFromAgentResponse}
+              output={output}
+            />
           </div>
 
           <InterviewRightSidebar
@@ -646,7 +680,7 @@ ${message}
         </main>
       ) : (
         <main className="flex-grow flex overflow-hidden p-8 overflow-y-auto">
-          <InterviewFeedback feedback={feedbackData}></InterviewFeedback>
+          <InterviewFeedback feedback={feedbackData} reference={reference}></InterviewFeedback>
         </main>
       )}
 

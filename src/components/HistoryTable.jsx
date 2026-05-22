@@ -53,17 +53,26 @@ const getColumns = (onViewSummary) => [
         width: 220,
         sortable: false,
         filterable: false,
-        renderCell: (params) => (
-            <div className="flex h-full w-full items-center">
-                <button
-                    onClick={() => onViewSummary?.(params.row)}
-                    className="flex items-center gap-1.5 px-3 rounded-lg border border-[#30363d] bg-[#21262d] hover:bg-[#30363d] hover:border-slate-500 text-slate-300 hover:text-white text-[11px] font-semibold tracking-wide uppercase transition-all cursor-pointer group"
-                >
-                    View Summary
-                    <span className="material-symbols-outlined text-[14px] text-slate-400 group-hover:text-white transition-colors">arrow_forward</span>
-                </button>
-            </div>
-        ),
+        renderCell: (params) => {
+            const isPending = params.row.Score === null || params.row.Score === undefined;
+            return (
+                <div className="flex h-full w-full items-center">
+                    <button
+                        onClick={() => onViewSummary?.(params.row)}
+                        className={`h-9 px-4 flex items-center gap-2 rounded-xl text-xs font-semibold tracking-wide uppercase transition-all duration-200 cursor-pointer group active:scale-[0.98] ${
+                            isPending
+                                ? "border border-slate-700/50 bg-slate-800/20 text-slate-400 hover:bg-slate-800/40 hover:text-slate-200 hover:border-slate-600"
+                                : "border border-indigo-500/20 bg-indigo-500/5 text-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-200 hover:border-indigo-500/40 shadow-sm shadow-indigo-950/10 hover:shadow-indigo-950/20"
+                        }`}
+                    >
+                        View Summary
+                        <span className="material-symbols-outlined text-[14px] transition-transform duration-200 group-hover:translate-x-0.5">
+                            arrow_forward
+                        </span>
+                    </button>
+                </div>
+            );
+        },
     },
 ];
 

@@ -4,7 +4,7 @@ let demo = "We will start with the interview shortly !!"
 
 export default function AIChatMessage({ text = demo }) {
     return (
-        <ChatMessage align="gap-2 max-w-[90%]" accent="bg-slate-800" sender="ai">
+        <ChatMessage align="gap-2 max-w-[90%]" accent="bg-white/[0.04] backdrop-blur-sm" sender="ai">
             <div className="prose prose-invert prose-sm max-w-none">
                 <ReactMarkdown
                     components={{
