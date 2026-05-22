@@ -6,7 +6,7 @@ import { getInterviewErrorMessage } from "./interviewErrors";
 
 export default function CodingTimer({ onTimeUp, curr_phase, extensionSeconds = 0 }) {
   const { sessionId } = useParams();
-  const [remainingTime, setRemainingTime] = useState(null);
+  const [endTime, setEndTime] = useState(null);
   const prevExtensionRef = useRef(0);
   // Track whether this component already fired onTimeUp for the current mount
   const hasFiredRef = useRef(false);
@@ -29,7 +29,7 @@ export default function CodingTimer({ onTimeUp, curr_phase, extensionSeconds = 0
         });
         if (res.data !== undefined && typeof res.data === 'number') {
           const secs = Math.max(0, Math.floor(res.data));
-          setRemainingTime(secs);
+          setEndTime(Date.now() + secs * 1000);
         }
       } catch (err) {
         console.error("Error fetching timer:", err);
@@ -43,23 +43,22 @@ export default function CodingTimer({ onTimeUp, curr_phase, extensionSeconds = 0
     const previousExtension = prevExtensionRef.current;
     if (extensionSeconds > previousExtension) {
       const extensionDelta = extensionSeconds - previousExtension;
-      setRemainingTime((prev) => (prev == null ? prev : prev + extensionDelta));
+      setEndTime((prev) => (prev == null ? null : prev + extensionDelta * 1000));
       // Reset the "already fired" flag so the new timer can fire onTimeUp later
       hasFiredRef.current = false;
     }
     prevExtensionRef.current = extensionSeconds;
   }, [extensionSeconds]);
 
-  if (remainingTime == null) {
+  if (endTime == null) {
     return <span className="text-slate-400">--:--</span>;
   }
 
+  const remainingSecs = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
   // If time is already 0, show 0:00 without starting a countdown
-  if (remainingTime <= 0) {
+  if (remainingSecs <= 0) {
     return <span>0:00</span>;
   }
-
-  const endTime = Date.now() + remainingTime * 1000;
 
   return (
     <Countdown

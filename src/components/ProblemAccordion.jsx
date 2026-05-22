@@ -9,9 +9,13 @@ export default function ProblemAccordion({ topic_deets }) {
     let problems_list = topic_deets.problems || [];
     const progressPercentage = topic_deets.total > 0 ? (topic_deets.completed / topic_deets.total) * 100 : 0;
 
-    const startInterview = async () => {
+    const startInterview = async (problemId = null) => {
         try {
-            const res = await api.post(`/interview/start?topic=${encodeURIComponent(topic_deets.topic)}`);
+            let url = `/interview/start?topic=${encodeURIComponent(topic_deets.topic)}`;
+            if (problemId) {
+                url += `&problem_id=${problemId}`;
+            }
+            const res = await api.post(url);
             let session_deets = res.data;
             console.log(session_deets);
             navigate(`/interviewPage/${session_deets.session_id}`, { state: { session_deets } });
@@ -67,7 +71,7 @@ export default function ProblemAccordion({ topic_deets }) {
                         {/* Primary CTA */}
                         <div className="mb-8">
                             <button
-                                onClick={startInterview}
+                                onClick={() => startInterview()}
                                 className="w-full py-3 px-6 rounded-lg bg-gradient-to-r from-[#137fec] to-[#0ea5e9] hover:from-[#1d82e6] hover:to-[#0284c7] text-white font-bold tracking-wide transition-all shadow-md shadow-[#137fec]/20 hover:shadow-lg hover:shadow-[#137fec]/40 hover:-translate-y-0.5 cursor-pointer"
                             >
                                 Start Random Interview
@@ -112,14 +116,24 @@ export default function ProblemAccordion({ topic_deets }) {
                                 <ul className="space-y-3">
                                     {problems_list.map((p) =>
                                         p.is_reattempt ? (
-                                            <li key={p.id} className="flex items-start gap-2 text-sm text-slate-300 bg-rose-500/5 p-2 rounded-md border border-rose-500/10 transition-colors hover:bg-rose-500/10">
-                                                <span className="material-symbols-outlined text-[18px] text-rose-500 shrink-0">error</span>
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold text-slate-200">{p.title}</span>
-                                                    {p.score !== null && (
-                                                        <span className="text-[10px] text-rose-400/80 font-mono mt-0.5">Scored: {p.score}%</span>
-                                                    )}
+                                            <li 
+                                                key={p.id} 
+                                                onClick={() => startInterview(p.id)}
+                                                className="flex items-center justify-between gap-2 text-sm text-slate-300 bg-rose-500/5 p-2 rounded-md border border-rose-500/10 transition-all duration-300 hover:border-rose-500/30 hover:bg-rose-500/10 cursor-pointer group"
+                                                title="Reattempt this specific problem"
+                                            >
+                                                <div className="flex items-start gap-2">
+                                                    <span className="material-symbols-outlined text-[18px] text-rose-500 shrink-0 mt-0.5">error</span>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-semibold text-slate-200 group-hover:text-rose-400 transition-colors">{p.title}</span>
+                                                        {p.score !== null && (
+                                                            <span className="text-[10px] text-rose-400/80 font-mono mt-0.5">Scored: {p.score}%</span>
+                                                        )}
+                                                    </div>
                                                 </div>
+                                                <span className="material-symbols-outlined text-rose-500 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 shrink-0">
+                                                    play_circle
+                                                </span>
                                             </li>
                                         ) : null
                                     )}

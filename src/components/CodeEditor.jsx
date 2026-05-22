@@ -11,7 +11,6 @@ export default function CodeEditor({ code, onChange, language, setLanguage, curr
     setLanguage(e.target.value);
   }
 
-  const isReadOnly = curr_phase !== "CODING"
 
   const getSelectedText = useCallback(() => {
     const editor = editorRef.current;
@@ -86,7 +85,7 @@ export default function CodeEditor({ code, onChange, language, setLanguage, curr
           wordWrap: "on",
           automaticLayout: true,
           tabSize: 4,
-          readOnly: isReadOnly
+          readOnly: false
         }}
       />
     </div>

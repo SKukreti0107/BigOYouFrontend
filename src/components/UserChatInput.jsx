@@ -6,7 +6,8 @@ export default function UserChatInput({
     attachedSelection,
     selectionWasTruncated,
     onAttachSelection,
-    onClearSelection
+    onClearSelection,
+    curr_phase
 }) {
 
     const [message, setMessage] = useState("");
@@ -29,11 +30,15 @@ export default function UserChatInput({
         }
     };
 
+    const placeholderText = curr_phase === "PROBLEM_DISCUSSION"
+        ? "Answer here based on the AI interviewer's question..."
+        : "Type your message to the interviewer...";
+
     return (
         <div className="group">
             <textarea
                 className="w-full bg-white dark:bg-panel-dark border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary focus:border-transparent min-h-[80px] resize-none"
-                placeholder="Type your message to the interviewer..." value={message} onChange={handleChange} onKeyDown={handleKeyDown}
+                placeholder={placeholderText} value={message} onChange={handleChange} onKeyDown={handleKeyDown}
             ></textarea>
             <div className="mt-2 flex items-center justify-between">
                 <button

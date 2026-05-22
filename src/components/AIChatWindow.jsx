@@ -98,6 +98,7 @@ export default function AIChatWindow({
                     selectionWasTruncated={selectionWasTruncated}
                     onAttachSelection={onAttachSelection}
                     onClearSelection={onClearSelection}
+                    curr_phase={curr_phase}
                 ></UserChatInput>
                 <div className="flex items-center justify-between mt-3 px-1">
                     <button className="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
