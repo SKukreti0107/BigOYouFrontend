@@ -18,31 +18,34 @@ const getColumns = (onViewSummary) => [
         editable: true,
     },
     {
-        field: 'Difficulty',
-        headerName: 'Difficulty',
-        type: 'string',
-        width: 150,
-        editable: true,
-    },
-    {
         field: 'Score',
         headerName: 'Score',
-        width: 200,
-        renderCell: (params) => (
-            <div className="w-[90%] flex flex-col justify-center h-full gap-2">
-                <div className="flex justify-between items-center text-xs">
-                    <span className="font-semibold text-slate-200">{params.value}/100</span>
-                </div>
-                <ScoreBar value={params.value} />
-            </div>
-        ),
-    },
-    {
-        field: 'Date',
-        headerName: 'Date',
-        type: 'string',
-        width: 150,
+        width: 250,
         editable: true,
+        renderCell: (params) => {
+            const score = params.value;
+            if (score === null || score === undefined) {
+                return (
+                    <div className="flex h-full w-full items-center">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#21262d] text-slate-400 border border-[#30363d]">
+                            Pending
+                        </span>
+                    </div>
+                );
+            }
+            return (
+                <div className="flex h-full w-full items-center pr-4">
+                    <div className="w-full">
+                        <div className="flex items-center justify-between mb-1">
+                            <span className={`text-xs font-bold ${score >= 80 ? 'text-emerald-400' : score >= 50 ? 'text-amber-400' : 'text-red-400'}`}>
+                                {score}/100
+                            </span>
+                        </div>
+                        <ScoreBar value={score} />
+                    </div>
+                </div>
+            );
+        }
     },
     {
         field: 'Action',

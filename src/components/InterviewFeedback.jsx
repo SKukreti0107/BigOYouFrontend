@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 
-export default function InterviewFeedback({ feedback, reference }) {
+export default function InterviewFeedback({ feedback, reference: propReference }) {
     const data = useMemo(() => {
         if (!feedback) return null;
         if (typeof feedback === 'string') {
@@ -14,16 +14,199 @@ export default function InterviewFeedback({ feedback, reference }) {
         return feedback; // Assume it's already an object
     }, [feedback]);
 
+    const [progress, setProgress] = useState(0);
+    const [statusText, setStatusText] = useState("Initializing report parser...");
+    const [isUnpacking, setIsUnpacking] = useState(false);
+    const [hasTriggered, setHasTriggered] = useState(false);
+
+    const sessionId = data?.session_summary?.session_id || 'default';
+    const sessionKey = `interview.unpacked.${sessionId}`;
+
+    useEffect(() => {
+        if (data && data.feedback && !hasTriggered) {
+            setHasTriggered(true);
+            const alreadyUnpacked = sessionStorage.getItem(sessionKey);
+            if (alreadyUnpacked) {
+                setIsUnpacking(false);
+            } else {
+                setIsUnpacking(true);
+            }
+        }
+    }, [data, hasTriggered, sessionKey]);
+
+    useEffect(() => {
+        if (!isUnpacking) return;
+
+        let currentProgress = 0;
+        let timer;
+
+        const messages = [
+            { threshold: 0, text: "Initializing AI feedback engine..." },
+            { threshold: 12, text: "Parsing transcripts & response pacing..." },
+            { threshold: 30, text: "Deconstructing code syntax & structure..." },
+            { threshold: 52, text: "Simulating algorithm runtimes & complexity limits..." },
+            { threshold: 72, text: "Evaluating architectural & technical decisions..." },
+            { threshold: 88, text: "Synthesizing improvement plan & benchmarks..." },
+            { threshold: 96, text: "Assembling final performance dashboard..." }
+        ];
+
+        const updateProgress = () => {
+            const increment = Math.floor(Math.random() * 4) + 3; // increment by 3-6%
+            currentProgress = Math.min(currentProgress + increment, 100);
+            setProgress(currentProgress);
+
+            const matched = messages.reduce((acc, curr) => {
+                if (currentProgress >= curr.threshold) return curr.text;
+                return acc;
+            }, messages[0].text);
+            setStatusText(matched);
+
+            if (currentProgress >= 100) {
+                clearInterval(timer);
+                setTimeout(() => {
+                    sessionStorage.setItem(sessionKey, "true");
+                    setIsUnpacking(false);
+                }, 750);
+            }
+        };
+
+        timer = setInterval(updateProgress, 70);
+
+        return () => clearInterval(timer);
+    }, [isUnpacking, sessionKey]);
+
     if (!data || !data.feedback) {
         return (
-            <div className="flex items-center justify-center p-12">
-                <div className="animate-pulse text-slate-400">Loading feedback analysis...</div>
+            <div className="flex items-center justify-center p-12 min-h-[400px]">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-10 h-10 border-4 border-[#137fec] border-t-transparent rounded-full animate-spin"></div>
+                    <div className="text-slate-400 text-sm font-medium animate-pulse">Loading feedback analysis...</div>
+                </div>
+            </div>
+        );
+    }
+
+    if (isUnpacking) {
+        const tasks = [
+            { label: "Deconstruct conversation transcript", start: 0, end: 25 },
+            { label: "Analyze implementation & edge cases", start: 25, end: 50 },
+            { label: "Evaluate computational complexity", start: 50, end: 75 },
+            { label: "Compile study & improvement plan", start: 75, end: 95 }
+        ];
+
+        return (
+            <div className="w-full min-h-[70vh] flex flex-col items-center justify-center p-4 md:p-8 animate-fade-in">
+                <div className="w-full max-w-lg bg-[#161b22]/40 backdrop-blur-xl border border-[#30363d] rounded-3xl p-8 relative overflow-hidden shadow-2xl">
+                    {/* Glowing background highlights */}
+                    <div className="absolute -top-24 -left-24 w-52 h-52 rounded-full bg-[#137fec]/15 blur-3xl pointer-events-none"></div>
+                    <div className="absolute -bottom-24 -right-24 w-52 h-52 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none"></div>
+                    <div className="absolute inset-0 tech-bg opacity-30 pointer-events-none"></div>
+
+                    <div className="relative z-10 flex flex-col items-center">
+                        {/* Glowing Header Icon */}
+                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#137fec]/20 to-emerald-500/20 border border-[#137fec]/30 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(19,127,236,0.15)] relative">
+                            <span className="material-symbols-outlined text-3xl text-white animate-pulse">insights</span>
+                        </div>
+
+                        <h3 className="text-2xl font-bold text-white mb-2 tracking-tight text-center">Compiling Interview Insights</h3>
+                        <p className="text-slate-400 text-xs text-center mb-6 max-w-xs leading-relaxed">
+                            Our AI analyzer is scoring your performance and preparing recommendations.
+                        </p>
+
+                        {/* Circular Progress & Percentage */}
+                        <div className="relative w-32 h-32 flex items-center justify-center mb-6">
+                            {/* Circular Track Background */}
+                            <svg className="w-full h-full transform -rotate-90">
+                                <circle
+                                    cx="64"
+                                    cy="64"
+                                    r="52"
+                                    stroke="#0d1117"
+                                    strokeWidth="8"
+                                    fill="transparent"
+                                    className="stroke-[#30363d]/50"
+                                />
+                                {/* Glow under active path */}
+                                <circle
+                                    cx="64"
+                                    cy="64"
+                                    r="52"
+                                    stroke="url(#progressGradient)"
+                                    strokeWidth="10"
+                                    fill="transparent"
+                                    strokeDasharray={2 * Math.PI * 52}
+                                    strokeDashoffset={2 * Math.PI * 52 * (1 - progress / 100)}
+                                    className="stroke-primary opacity-20 blur-sm transition-all duration-100 ease-out"
+                                />
+                                <circle
+                                    cx="64"
+                                    cy="64"
+                                    r="52"
+                                    stroke="url(#progressGradient)"
+                                    strokeWidth="8"
+                                    strokeLinecap="round"
+                                    fill="transparent"
+                                    strokeDasharray={2 * Math.PI * 52}
+                                    strokeDashoffset={2 * Math.PI * 52 * (1 - progress / 100)}
+                                    className="transition-all duration-100 ease-out"
+                                />
+                                <defs>
+                                    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="#137fec" />
+                                        <stop offset="100%" stopColor="#0bda5b" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                            <div className="absolute text-center">
+                                <span className="text-3xl font-mono font-extrabold text-white tracking-tight">{progress}%</span>
+                                <span className="block text-[9px] text-slate-500 uppercase tracking-widest font-bold mt-0.5">Progress</span>
+                            </div>
+                        </div>
+
+                        {/* Status Message */}
+                        <div className="w-full text-center py-2 px-4 rounded-xl bg-[#0d1117]/60 border border-[#30363d]/50 mb-8 min-h-[48px] flex items-center justify-center">
+                            <span className="text-sm font-semibold text-slate-300 transition-all duration-300">
+                                {statusText}
+                            </span>
+                        </div>
+
+                        {/* Checklist of tasks */}
+                        <div className="w-full space-y-3.5 border-t border-[#30363d]/50 pt-6">
+                            {tasks.map((task, idx) => {
+                                const isDone = progress >= task.end;
+                                const isActive = progress >= task.start && progress < task.end;
+                                return (
+                                    <div key={idx} className="flex items-center gap-3 transition-all duration-300">
+                                        {isDone ? (
+                                            <span className="material-symbols-outlined text-emerald-400 text-lg shrink-0 transition-transform duration-300 scale-100">check_circle</span>
+                                        ) : isActive ? (
+                                            <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                                                <div className="w-2.5 h-2.5 rounded-full bg-[#137fec] animate-ping absolute"></div>
+                                                <div className="w-2 h-2 rounded-full bg-[#137fec] relative"></div>
+                                            </div>
+                                        ) : (
+                                            <span className="material-symbols-outlined text-slate-600 text-lg shrink-0">radio_button_unchecked</span>
+                                        )}
+                                        <span className={`text-xs font-semibold tracking-wide transition-all ${
+                                            isDone ? "text-slate-300" :
+                                            isActive ? "text-[#137fec] font-bold" :
+                                            "text-slate-500"
+                                        }`}>
+                                            {task.label}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
 
     const { feedback: f } = data;
     const { session_summary, scores, strengths, weaknesses, key_metrics, final_verdict } = f;
+    const reference = propReference || data?.reference;
 
     // Helper to format time
     const formatTime = (seconds) => {

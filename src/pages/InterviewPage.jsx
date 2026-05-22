@@ -92,6 +92,18 @@ export default function InterviewPage() {
           // Restore phase from backend on refresh
           if (res.data.phase) {
             setPhase(res.data.phase);
+            if (res.data.phase === "FEEDBACK" && !feedbackData) {
+              try {
+                const fbRes = await api.get("/interview/session/feedback", {
+                  params: { session_id: sessionId }
+                });
+                if (fbRes?.data) {
+                  syncFromAgentResponse(fbRes.data);
+                }
+              } catch (fbErr) {
+                console.error("Failed to load feedback details:", fbErr);
+              }
+            }
           }
         }
       } catch (error) {
