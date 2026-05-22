@@ -86,11 +86,7 @@ export default function HomeFeatures() {
                                 </p>
                             </div>
 
-                            {/* Arrow Indicator Link */}
-                            <div className="flex items-center gap-2 mt-8 text-xs font-bold text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors duration-300">
-                                <span>Learn More</span>
-                                <span className="material-symbols-outlined text-sm transition-transform duration-300 group-hover:translate-x-1">arrow_forward</span>
-                            </div>
+
                         </div>
                     ))}
                 </div>
