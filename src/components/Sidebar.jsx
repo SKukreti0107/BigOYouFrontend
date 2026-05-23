@@ -13,6 +13,7 @@ export default function Sidebar({ isUser }){
     const handleLogout = async () => {
         try {
             await api.post("/logout");
+            localStorage.removeItem("access_token");
             window.location.href = "/login";
         } catch (err) {
             console.error("Logout failed:", err);

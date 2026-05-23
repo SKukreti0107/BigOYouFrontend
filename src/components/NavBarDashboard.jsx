@@ -6,6 +6,7 @@ export default function NavBarDashboard({setIsUser}) {
     const  logout = async ()=>{
         try{
             await api.post("/logout");
+            localStorage.removeItem("access_token");
             setIsUser(null);
             console.log("logout successful")
             navigate("/login");

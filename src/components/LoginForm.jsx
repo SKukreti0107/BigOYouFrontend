@@ -14,7 +14,10 @@ export default function LoginForm({ checkAuth }) {
         try {
             setLoading(true);
             setAuthError(null);
-            await api.post("/login", { email, password });
+            const res = await api.post("/login", { email, password });
+            if (res.data?.access_token) {
+                localStorage.setItem("access_token", res.data.access_token);
+            }
             const user = await checkAuth();
             if (user) {
                 setLoading(false);

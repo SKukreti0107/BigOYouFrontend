@@ -119,6 +119,7 @@ function Settings({ isUser, checkAuth }) {
     try {
       setLoading(true);
       await api.delete("/user/account");
+      localStorage.removeItem("access_token");
       setShowDeleteConfirm(false);
       if (checkAuth) {
         await checkAuth();
