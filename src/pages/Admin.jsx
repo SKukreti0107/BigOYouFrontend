@@ -26,12 +26,58 @@ export default function Admin({ isUser }) {
     const [toast, setToast] = useState(null);
 
     // Form state
-    const [form, setForm] = useState({ title: '', statement: '', example: '', difficulty: 'Medium', expected_time: 30, topics: [] });
+    const [form, setForm] = useState({ title: '', statement: '', example: '', difficulty: 'Medium', expected_time: 30, topics: [], leetcode_slug: '', leetcode_url: '' });
     const [topicInput, setTopicInput] = useState('');
     const [showRef, setShowRef] = useState(false);
     const [refForm, setRefForm] = useState({ optimal_approach: '', time_complexity: '', space_complexity: '', key_insights: '', common_pitfalls: '', pseudocode: '' });
     const [refExists, setRefExists] = useState(false);
     const [refSaving, setRefSaving] = useState(false);
+    
+    // LeetCode seeding state
+    const [seedInput, setSeedInput] = useState('');
+    const [seeding, setSeeding] = useState(false);
+
+    const handleFetchLeetCode = async () => {
+        if (!seedInput.trim()) return;
+        setSeeding(true);
+        try {
+            const res = await api.post('/admin/problems/preview-import', { url: seedInput });
+            const data = res.data;
+            
+            // Auto-fill form state
+            setForm({
+                title: data.title || '',
+                statement: data.statement || '',
+                example: data.example || '',
+                difficulty: data.difficulty || 'Medium',
+                expected_time: data.expected_time || 30,
+                topics: data.topics || [],
+                leetcode_slug: data.leetcode_slug || '',
+                leetcode_url: data.leetcode_url || ''
+            });
+            
+            // Auto-fill reference form state
+            setRefForm({
+                optimal_approach: data.optimal_approach || '',
+                time_complexity: data.time_complexity || 'O(N)',
+                space_complexity: data.space_complexity || 'O(1)',
+                key_insights: data.key_insights || '',
+                common_pitfalls: data.common_pitfalls || '',
+                pseudocode: data.pseudocode || ''
+            });
+            
+            setEditingProblem(null); // It is a new problem
+            setRefExists(false);
+            setShowRef(true); // Open reference solution section automatically
+            setShowModal(true); // Open the creation modal showing auto-filled fields
+            setSeedInput('');
+            showToast('LeetCode details fetched & loaded!');
+        } catch (err) {
+            showToast(err.response?.data?.detail || 'Failed to fetch LeetCode data', 'error');
+        } finally {
+            setSeeding(false);
+        }
+    };
 
     const showToast = (msg, type = 'success') => {
         setToast({ msg, type });
@@ -82,7 +128,7 @@ export default function Admin({ isUser }) {
     // Open create modal
     const openCreate = () => {
         setEditingProblem(null);
-        setForm({ title: '', statement: '', example: '', difficulty: 'Medium', expected_time: 30, topics: [] });
+        setForm({ title: '', statement: '', example: '', difficulty: 'Medium', expected_time: 30, topics: [], leetcode_slug: '', leetcode_url: '' });
         setShowRef(false);
         setRefForm({ optimal_approach: '', time_complexity: '', space_complexity: '', key_insights: '', common_pitfalls: '', pseudocode: '' });
         setRefExists(false);
@@ -94,7 +140,8 @@ export default function Admin({ isUser }) {
         setEditingProblem(p);
         setForm({
             title: p.title, statement: p.statement, example: p.example,
-            difficulty: p.difficulty, expected_time: p.expected_time, topics: [...p.topics]
+            difficulty: p.difficulty, expected_time: p.expected_time, topics: [...p.topics],
+            leetcode_slug: p.leetcode_slug || '', leetcode_url: p.leetcode_url || ''
         });
         setShowModal(true);
         // Fetch full problem with reference
@@ -124,7 +171,16 @@ export default function Admin({ isUser }) {
                 await api.put(`/admin/problems/${editingProblem.problem_id}`, form);
                 showToast('Problem updated');
             } else {
-                await api.post('/admin/problems', form);
+                const payload = {
+                    ...form,
+                    optimal_approach: refForm.optimal_approach || null,
+                    time_complexity: refForm.time_complexity || null,
+                    space_complexity: refForm.space_complexity || null,
+                    key_insights: refForm.key_insights || null,
+                    common_pitfalls: refForm.common_pitfalls || null,
+                    pseudocode: refForm.pseudocode || null
+                };
+                await api.post('/admin/problems', payload);
                 showToast('Problem created');
             }
             setShowModal(false);
@@ -242,6 +298,48 @@ export default function Admin({ isUser }) {
                                 <StatCard label="Easy" value={stats.easy} icon="sentiment_satisfied" color="text-emerald-400" />
                                 <StatCard label="Medium" value={stats.medium} icon="psychology" color="text-amber-400" />
                                 <StatCard label="Hard" value={stats.hard} icon="local_fire_department" color="text-rose-400" />
+                            </div>
+
+                            {/* LeetCode Seeding Card */}
+                            <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-6 relative overflow-hidden group hover:border-[#137fec]/20 transition-all duration-300">
+                                <div className="absolute -right-16 -top-16 w-32 h-32 rounded-full bg-[#137fec]/5 blur-2xl pointer-events-none transition-transform duration-500 group-hover:scale-125"></div>
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                    <div className="space-y-1 text-left">
+                                        <div className="flex items-center gap-2 text-amber-500">
+                                            <span className="material-symbols-outlined text-xl">cloud_download</span>
+                                            <h3 className="font-bold text-white">Seed Problem from LeetCode</h3>
+                                        </div>
+                                        <p className="text-xs text-slate-400 max-w-xl">
+                                            Fetch metadata and generate reference solutions using AI. You can review and modify the data in a form before saving globally.
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-1 max-w-xl gap-2 w-full md:justify-end">
+                                        <input 
+                                            className="flex-1 bg-[#0d1117]/80 border border-[#30363d] rounded-xl px-4 py-3 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#137fec] focus:ring-1 focus:ring-[#137fec] disabled:opacity-60 transition-all"
+                                            placeholder="LeetCode URL or Slug (e.g. climbing-stairs)" 
+                                            value={seedInput}
+                                            onChange={e => setSeedInput(e.target.value)}
+                                            disabled={seeding}
+                                        />
+                                        <button 
+                                            onClick={handleFetchLeetCode} 
+                                            disabled={seeding || !seedInput.trim()}
+                                            className="bg-amber-600 hover:bg-amber-500 disabled:bg-amber-600/50 disabled:opacity-60 text-white rounded-xl px-6 py-3 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer shrink-0"
+                                        >
+                                            {seeding ? (
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                                    Fetching…
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="material-symbols-outlined text-sm">bolt</span>
+                                                    Fetch & Auto-Fill
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Problems Table */}
@@ -380,6 +478,17 @@ export default function Admin({ isUser }) {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
+                                    <label className={labelClass}>LeetCode Slug</label>
+                                    <input className={inputClass} placeholder="e.g. two-sum" value={form.leetcode_slug || ''} onChange={e => setForm(f => ({ ...f, leetcode_slug: e.target.value }))} />
+                                </div>
+                                <div>
+                                    <label className={labelClass}>LeetCode URL</label>
+                                    <input className={inputClass} placeholder="e.g. https://leetcode.com/problems/two-sum/" value={form.leetcode_url || ''} onChange={e => setForm(f => ({ ...f, leetcode_url: e.target.value }))} />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
                                     <label className={labelClass}>Difficulty *</label>
                                     <select className={inputClass + " appearance-none cursor-pointer"} value={form.difficulty} onChange={e => setForm(f => ({ ...f, difficulty: e.target.value }))}>
                                         <option value="Easy">Easy</option>
@@ -413,10 +522,7 @@ export default function Admin({ isUser }) {
                                         </span>
                                     ))}
                                 </div>
-                            </div>
-
-                            {/* ── Reference Solution (edit only) ── */}
-                            {editingProblem && (
+                                {/* ── Reference Solution ── */}
                                 <div className="border-t border-[#30363d] pt-4 mt-4">
                                     <button onClick={() => setShowRef(r => !r)} className="flex items-center gap-2 text-sm font-bold text-slate-300 hover:text-white transition-colors cursor-pointer w-full text-left">
                                         <span className="material-symbols-outlined text-base transition-transform" style={{ transform: showRef ? 'rotate(90deg)' : 'rotate(0)' }}>chevron_right</span>
@@ -452,20 +558,22 @@ export default function Admin({ isUser }) {
                                                 <label className={labelClass}>Pseudocode</label>
                                                 <textarea className={textareaClass + " font-mono text-xs"} rows={6} placeholder="sort(arr)&#10;left = 0, right = n-1&#10;while left < right:&#10;  ..." value={refForm.pseudocode} onChange={e => setRefForm(f => ({ ...f, pseudocode: e.target.value }))} />
                                             </div>
-                                            <div className="flex items-center gap-3">
-                                                <button onClick={handleSaveRef} disabled={refSaving} className="px-5 py-2 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors cursor-pointer disabled:opacity-50">
-                                                    {refSaving ? 'Saving…' : (refExists ? 'Update Reference' : 'Add Reference')}
-                                                </button>
-                                                {refExists && (
-                                                    <button onClick={handleDeleteRef} className="px-4 py-2 rounded-xl text-sm font-bold text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 transition-colors cursor-pointer">
-                                                        Delete Reference
+                                            {editingProblem && (
+                                                <div className="flex items-center gap-3">
+                                                    <button onClick={handleSaveRef} disabled={refSaving} className="px-5 py-2 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors cursor-pointer disabled:opacity-50">
+                                                        {refSaving ? 'Saving…' : (refExists ? 'Update Reference' : 'Add Reference')}
                                                     </button>
-                                                )}
-                                            </div>
+                                                    {refExists && (
+                                                        <button onClick={handleDeleteRef} className="px-4 py-2 rounded-xl text-sm font-bold text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 transition-colors cursor-pointer">
+                                                            Delete Reference
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
-                            )}
+                            </div>
                         </div>
 
                         {/* Modal footer */}

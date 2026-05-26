@@ -94,9 +94,17 @@ export default function ProblemAccordion({ topic_deets }) {
                                                 <span className="material-symbols-outlined text-[18px] text-emerald-500 shrink-0">check_circle</span>
                                                 <div className="flex flex-col">
                                                     <span className="font-semibold text-slate-200">{p.title}</span>
-                                                    {p.score !== null && (
-                                                        <span className="text-[10px] text-emerald-400/80 font-mono mt-0.5">Scored: {p.score}%</span>
-                                                    )}
+                                                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                                        {p.score !== null && (
+                                                            <span className="text-[10px] text-emerald-400/80 font-mono">Scored: {p.score}%</span>
+                                                        )}
+                                                        {p.is_imported && (
+                                                            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-sky-400 bg-sky-400/10 border border-sky-400/20 px-1.5 py-0.5 rounded">
+                                                                <span className="material-symbols-outlined text-[10px]">cloud</span>
+                                                                Imported
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </li>
                                         ) : null
@@ -126,9 +134,17 @@ export default function ProblemAccordion({ topic_deets }) {
                                                     <span className="material-symbols-outlined text-[18px] text-rose-500 shrink-0 mt-0.5">error</span>
                                                     <div className="flex flex-col">
                                                         <span className="font-semibold text-slate-200 group-hover:text-rose-400 transition-colors">{p.title}</span>
-                                                        {p.score !== null && (
-                                                            <span className="text-[10px] text-rose-400/80 font-mono mt-0.5">Scored: {p.score}%</span>
-                                                        )}
+                                                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                                            {p.score !== null && (
+                                                                <span className="text-[10px] text-rose-400/80 font-mono">Scored: {p.score}%</span>
+                                                            )}
+                                                            {p.is_imported && (
+                                                                <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-sky-400 bg-sky-400/10 border border-sky-400/20 px-1.5 py-0.5 rounded">
+                                                                    <span className="material-symbols-outlined text-[10px]">cloud</span>
+                                                                    Imported
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <span className="material-symbols-outlined text-rose-500 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 shrink-0">
@@ -153,8 +169,16 @@ export default function ProblemAccordion({ topic_deets }) {
                                     {problems_list.map((p) =>
                                         (!p.is_completed && !p.is_reattempt) ? (
                                             <li key={p.id} className="flex items-start gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors p-2 rounded-md hover:bg-slate-800/50">
-                                                <span className="material-symbols-outlined text-[18px] text-slate-600 shrink-0">circle</span>
-                                                <span className="font-medium">{p.title}</span>
+                                                <span className="material-symbols-outlined text-[18px] text-slate-600 shrink-0 mt-0.5">circle</span>
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium text-slate-200">{p.title}</span>
+                                                    {p.is_imported && (
+                                                        <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-sky-400 bg-sky-400/10 border border-sky-400/20 px-1.5 py-0.5 rounded mt-0.5 w-fit">
+                                                            <span className="material-symbols-outlined text-[10px]">cloud</span>
+                                                            Imported
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </li>
                                         ) : null
                                     )}
