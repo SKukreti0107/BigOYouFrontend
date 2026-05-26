@@ -51,9 +51,9 @@ function Login({ checkAuth }) {
                         </p>
                     </div>
 
-                    {/* Terminal Mockup */}
+                    {/* Terminal Mockup resembling actual feedback page */}
                     <div className="flex-1 flex items-center">
-                        <div className="w-full max-w-lg rounded-2xl overflow-hidden border border-[#30363d]/80 shadow-2xl shadow-indigo-950/40"
+                        <div className="w-full max-w-lg rounded-2xl overflow-hidden border border-[#30363d]/80 shadow-2xl shadow-indigo-950/40 select-none animate-fade-in"
                             style={{ background: 'linear-gradient(135deg, rgba(22,27,34,0.85) 0%, rgba(13,17,23,0.95) 100%)', backdropFilter: 'blur(12px)' }}>
 
                             {/* Terminal header bar */}
@@ -63,102 +63,79 @@ function Login({ checkAuth }) {
                                     <div className="w-3 h-3 rounded-full bg-amber-500/80" />
                                     <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
                                 </div>
-                                <span className="text-[10px] font-mono text-slate-500">ai_assessment.py</span>
-                                <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold uppercase tracking-wider animate-pulse">
-                                    ● Live
+                                <span className="text-[10px] font-mono text-slate-500">ai_feedback.py</span>
+                                <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#0bda5b]/10 border border-[#0bda5b]/20 text-[#0bda5b] font-bold uppercase tracking-wider animate-pulse">
+                                    ● assessment
                                 </span>
                             </div>
 
-                            {/* Code area */}
-                            <div className="px-5 pt-4 pb-2 font-mono text-sm leading-7">
-                                <div className="text-slate-600 text-xs mb-1"># Two-pointer — Container with Most Water</div>
-                                <div>
-                                    <span className="text-indigo-400">def</span>{' '}
-                                    <span className="text-teal-300">maxArea</span>
-                                    <span className="text-slate-300">(</span>
-                                    <span className="text-orange-300">height</span>
-                                    <span className="text-slate-300">):</span>
-                                </div>
-                                <div className="pl-6">
-                                    <span className="text-slate-500">left, right</span>
-                                    <span className="text-slate-400"> = </span>
-                                    <span className="text-amber-400">0</span>
-                                    <span className="text-slate-400">, </span>
-                                    <span className="text-indigo-400">len</span>
-                                    <span className="text-slate-300">(height) - </span>
-                                    <span className="text-amber-400">1</span>
-                                </div>
-                                <div className="pl-6">
-                                    <span className="text-slate-500">best</span>
-                                    <span className="text-slate-400"> = </span>
-                                    <span className="text-amber-400">0</span>
-                                </div>
-                                <div className="pl-6 mt-1">
-                                    <span className="text-indigo-400">while</span>
-                                    <span className="text-slate-300"> left </span>
-                                    <span className="text-rose-400">&lt;</span>
-                                    <span className="text-slate-300"> right:</span>
-                                </div>
-                                <div className="pl-12">
-                                    <span className="text-slate-500">best</span>
-                                    <span className="text-slate-400"> = </span>
-                                    <span className="text-indigo-400">max</span>
-                                    <span className="text-slate-300">(best, </span>
-                                    <span className="text-indigo-400">min</span>
-                                    <span className="text-slate-300">(height[left], height[right])</span>
-                                </div>
-                                <div className="pl-24">
-                                    <span className="text-slate-400"> * (right - left))</span>
-                                </div>
-                                <div className="pl-12 mt-1">
-                                    <span className="text-indigo-400">if</span>
-                                    <span className="text-slate-300"> height[left] </span>
-                                    <span className="text-rose-400">&lt;</span>
-                                    <span className="text-slate-300"> height[right]: left </span>
-                                    <span className="text-slate-400">+= </span>
-                                    <span className="text-amber-400">1</span>
-                                </div>
-                                <div className="pl-12">
-                                    <span className="text-indigo-400">else</span>
-                                    <span className="text-slate-300">: right </span>
-                                    <span className="text-slate-400">-= </span>
-                                    <span className="text-amber-400">1</span>
-                                </div>
-                                <div className="pl-6 mt-1">
-                                    <span className="text-indigo-400">return</span>
-                                    <span className="text-slate-300"> best</span>
-                                </div>
-                            </div>
+                            {/* Main Body of Feedback Mockup */}
+                            <div className="p-5 space-y-4">
+                                
+                                {/* Top Banner Card: Strong Performance */}
+                                <div className="bg-[#161b22]/70 border border-[#30363d]/60 rounded-xl p-4 flex items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3">
+                                        {/* Score Gauge */}
+                                        <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
+                                            <svg className="absolute w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                                <circle cx="50" cy="50" r="40" stroke="#1f2937" strokeWidth="10" fill="transparent" />
+                                                <circle cx="50" cy="50" r="40" stroke="#0bda5b" strokeWidth="10" fill="transparent"
+                                                    strokeDasharray="251.2"
+                                                    strokeDashoffset="37.6" // 85% score offset
+                                                    strokeLinecap="round"
+                                                />
+                                            </svg>
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-[12px] font-black text-white font-mono leading-none">85</span>
+                                                <span className="text-[5px] text-[#0bda5b] font-bold tracking-widest mt-0.5">SCORE</span>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Performance Description */}
+                                        <div className="text-left space-y-0.5">
+                                            <h4 className="text-xs font-black text-white">Strong Performance</h4>
+                                            <p className="text-[9px] text-slate-400 leading-snug">Met the hiring bar for a junior to mid-level engineering role.</p>
+                                        </div>
+                                    </div>
 
-                            {/* Divider */}
-                            <div className="mx-5 border-t border-[#30363d]/60 my-3" />
+                                    {/* Info tags */}
+                                    <div className="flex gap-1.5 shrink-0 text-[8px] font-mono">
+                                        <div className="bg-[#070b11] border border-[#30363d] px-2 py-1 rounded text-center">
+                                            <div className="text-slate-500 font-bold uppercase tracking-wider text-[6px]">TIME</div>
+                                            <div className="font-bold text-slate-200">3:11</div>
+                                        </div>
+                                        <div className="bg-[#070b11] border border-[#30363d] px-2 py-1 rounded text-center">
+                                            <div className="text-slate-500 font-bold uppercase tracking-wider text-[6px]">DIFF</div>
+                                            <div className="font-bold text-yellow-400">Easy</div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                            {/* AI Assessment row */}
-                            <div className="px-5 pb-5">
-                                <div className="text-[9px] uppercase tracking-widest text-slate-600 font-bold mb-3">AI Assessment</div>
-                                <div className="grid grid-cols-3 gap-3">
-                                    <div className="rounded-xl p-3 bg-emerald-500/5 border border-emerald-500/20 flex flex-col gap-1">
-                                        <span className="text-[9px] text-slate-500 uppercase font-bold tracking-wider">Time</span>
-                                        <span className="text-base font-black text-emerald-400 font-mono">O(N)</span>
-                                        <span className="text-[9px] text-emerald-600 font-bold">✓ Optimal</span>
-                                    </div>
-                                    <div className="rounded-xl p-3 bg-emerald-500/5 border border-emerald-500/20 flex flex-col gap-1">
-                                        <span className="text-[9px] text-slate-500 uppercase font-bold tracking-wider">Space</span>
-                                        <span className="text-base font-black text-emerald-400 font-mono">O(1)</span>
-                                        <span className="text-[9px] text-emerald-600 font-bold">✓ In-place</span>
-                                    </div>
-                                    <div className="rounded-xl p-3 bg-indigo-500/5 border border-indigo-500/20 flex flex-col gap-1">
-                                        <span className="text-[9px] text-slate-500 uppercase font-bold tracking-wider">Score</span>
-                                        <span className="text-base font-black text-indigo-400 font-mono">94</span>
-                                        <span className="text-[9px] text-indigo-400 font-bold">↑ Top 8%</span>
+                                {/* Strengths Highlights */}
+                                <div className="space-y-2 text-left">
+                                    <span className="text-[8px] font-bold uppercase text-slate-500 tracking-wider">STRENGTHS & HIGHLIGHTS</span>
+                                    <div className="bg-[#161b22]/30 border border-[#30363d]/50 rounded-xl p-3 flex items-start gap-2.5">
+                                        <span className="material-symbols-outlined text-[#0bda5b] text-sm mt-0.5">check_circle</span>
+                                        <div>
+                                            <h6 className="text-[10px] font-bold text-slate-200">Optimal Algorithm Implementation</h6>
+                                            <p className="text-[9px] text-slate-400 mt-0.5">Independently identified the O(n) time complexity solution with O(1) space usage.</p>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="mt-3 flex items-center gap-2 p-2.5 rounded-lg bg-[#137fec]/5 border border-[#137fec]/20">
-                                    <span className="material-symbols-outlined text-[#137fec] text-base shrink-0">smart_toy</span>
-                                    <p className="text-[10px] text-slate-400 leading-relaxed">
-                                        <span className="text-white font-bold">Excellent edge-case handling.</span> Two-pointer reduces brute-force O(N²) to linear time elegantly.
-                                    </p>
+
+                                {/* Verdict row */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center pt-1.5">
+                                    <div className="space-y-1 text-left">
+                                        <span className="text-[7px] font-bold text-slate-500 uppercase tracking-widest block text-center sm:text-left">FINAL VERDICT</span>
+                                        <div className="bg-[#0bda5b]/10 border border-[#0bda5b]/20 rounded-xl py-2 text-center">
+                                            <span className="text-[10px] font-black text-[#0bda5b] uppercase tracking-[0.2em]">● HIRE</span>
+                                        </div>
+                                    </div>
+                                    <button className="w-full bg-[#137fec] text-white font-extrabold text-[9px] py-3 rounded-xl uppercase tracking-wider cursor-default shadow-lg shadow-[#137fec]/20 select-none">
+                                        RETURN TO DASHBOARD
+                                    </button>
                                 </div>
+
                             </div>
                         </div>
                     </div>

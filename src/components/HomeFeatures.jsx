@@ -37,6 +37,15 @@ export default function HomeFeatures() {
             glowClass: "from-amber-500/20 to-orange-500/20",
             iconClass: "bg-amber-500/10 text-amber-500 border-amber-500/20 dark:border-amber-500/30",
             textColor: "text-amber-500"
+        },
+        {
+            icon: "bolt",
+            title: "LeetCode Direct Import",
+            tagline: "Practice any problem",
+            description: "Paste any LeetCode problem URL or slug. Our platform instantly fetches details, examples, test cases, and generates a starting code template using AI.",
+            glowClass: "from-[#f48c06]/20 to-amber-500/20",
+            iconClass: "bg-[#f48c06]/10 text-[#f48c06] border-[#f48c06]/20 dark:border-[#f48c06]/30",
+            textColor: "text-[#f48c06]"
         }
     ];
 
@@ -59,36 +68,37 @@ export default function HomeFeatures() {
                 </div>
 
                 {/* Features Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {features.map((feature, idx) => (
-                        <div
-                            key={idx}
-                            className="group relative rounded-3xl border border-slate-200/80 dark:border-white/5 bg-white dark:bg-[#161b22]/30 backdrop-blur-xl p-8 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 flex flex-col justify-between overflow-hidden hover:-translate-y-1.5"
-                        >
-                            {/* Radial Glow Highlight */}
-                            <div className={`absolute -right-20 -top-20 w-44 h-44 rounded-full bg-gradient-to-br ${feature.glowClass} blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`}></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
+                    {features.map((feature, idx) => {
+                        const colSpanClass = idx < 3 ? "lg:col-span-2" : "lg:col-span-3";
+                        return (
+                            <div
+                                key={idx}
+                                className={`group relative rounded-3xl border border-slate-200/80 dark:border-white/5 bg-white dark:bg-[#161b22]/30 backdrop-blur-xl p-8 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 flex flex-col justify-between overflow-hidden hover:-translate-y-1.5 ${colSpanClass}`}
+                            >
+                                {/* Radial Glow Highlight */}
+                                <div className={`absolute -right-20 -top-20 w-44 h-44 rounded-full bg-gradient-to-br ${feature.glowClass} blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`}></div>
 
-                            <div>
-                                {/* Icon Badge */}
-                                <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center mb-8 shadow-sm transition-transform duration-500 group-hover:scale-110 ${feature.iconClass}`}>
-                                    <span className="material-symbols-outlined text-3xl font-light">{feature.icon}</span>
+                                <div>
+                                    {/* Icon Badge */}
+                                    <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center mb-8 shadow-sm transition-transform duration-500 group-hover:scale-110 ${feature.iconClass}`}>
+                                        <span className="material-symbols-outlined text-3xl font-light">{feature.icon}</span>
+                                    </div>
+
+                                    {/* Content */}
+                                    <span className={`text-[10px] uppercase font-bold tracking-widest block mb-2 ${feature.textColor}`}>
+                                        {feature.tagline}
+                                    </span>
+                                    <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight leading-snug">
+                                        {feature.title}
+                                    </h4>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
+                                        {feature.description}
+                                    </p>
                                 </div>
-
-                                {/* Content */}
-                                <span className={`text-[10px] uppercase font-bold tracking-widest block mb-2 ${feature.textColor}`}>
-                                    {feature.tagline}
-                                </span>
-                                <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight leading-snug">
-                                    {feature.title}
-                                </h4>
-                                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
-                                    {feature.description}
-                                </p>
                             </div>
-
-
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         </section>

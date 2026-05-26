@@ -17,18 +17,26 @@ export default function Hero() {
                         LLM Powered Mentorship
                     </div>
                     <h1 className="text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight text-slate-900 dark:text-white">
-                        Conquer Technical Interviews.{' '}
-                        <span className="text-primary">No Stage Fright</span> Required.
+                        Conquer Technical Interviews.<br />
+                        <span className="bg-gradient-to-r from-primary via-indigo-400 to-success bg-clip-text text-transparent">No Stage Fright Required.</span>
                     </h1>
                     <p className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-xl leading-relaxed">
                         Master Data Structures and Algorithms with AI-led practice sessions. Mimic the pressure
                         of a real interview in a safe, private environment designed for developers.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex flex-col sm:flex-row gap-4 relative z-10">
+                        <Link
+                            to="/dashboard"
+                            className="bg-primary hover:bg-primary/95 text-white font-bold h-14 px-8 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/35 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                        >
+                            <span className="material-symbols-outlined text-lg">play_arrow</span>
+                            Start Practicing
+                        </Link>
                         <button
                             onClick={() => setIsModalOpen(true)}
-                            className="border border-slate-300 dark:border-slate-700 font-bold h-14 px-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+                            className="border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-bold h-14 px-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-0.5 active:translate-y-0"
                         >
+                            <span className="material-symbols-outlined text-lg">visibility</span>
                             View Demo Sessions
                         </button>
                     </div>
@@ -47,77 +55,111 @@ export default function Hero() {
 
                 <div className="relative">
                     <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full opacity-30"></div>
-                    <div className="relative bg-[#0d1117] rounded-xl border border-slate-700 shadow-2xl overflow-hidden aspect-[4/3] flex flex-col">
-                        <div className="bg-[#161b22] px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-                            <div className="flex gap-1.5">
-                                <div className="size-3 rounded-full bg-red-500/80"></div>
-                                <div className="size-3 rounded-full bg-amber-500/80"></div>
-                                <div className="size-3 rounded-full bg-emerald-500/80"></div>
-                            </div>
+                    <div className="relative bg-[#070b11] rounded-xl border border-[#30363d] shadow-2xl overflow-hidden aspect-[4/3] flex flex-col">
+                        
+                        {/* Header bar resembling actual workspace */}
+                        <div className="bg-[#0d1117] px-4 py-2.5 border-b border-[#30363d] flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2 text-primary font-mono text-sm bg-primary/10 px-3 py-1 rounded border border-primary/20">
-                                    <span className="material-symbols-outlined text-sm">timer</span>
-                                    <span>24:58</span>
+                                <div className="text-xs font-bold text-white tracking-tight">
+                                    BigO<span className="text-[#137fec]">(You)</span>
                                 </div>
-                                <button className="bg-success text-slate-900 px-3 py-1 rounded text-xs font-bold hover:bg-success/90">
-                                    RUN CODE
-                                </button>
-                            </div>
-                        </div>
-                        <div className="flex-1 flex overflow-hidden">
-                            <div className="w-12 bg-[#0d1117] border-r border-slate-800 flex flex-col items-center py-4 gap-4">
-                                <span className="material-symbols-outlined text-slate-500 text-lg">description</span>
-                                <span className="material-symbols-outlined text-primary text-lg">code</span>
-                                <span className="material-symbols-outlined text-slate-500 text-lg">settings</span>
-                            </div>
-                            <div className="flex-1 p-6 font-mono text-sm leading-relaxed overflow-hidden">
-                                <div className="flex gap-4">
-                                    <span className="text-slate-600">1</span>
-                                    <span className="text-purple-400">class</span> <span className="text-blue-400">Solution</span>:
-                                </div>
-                                <div className="flex gap-4">
-                                    <span className="text-slate-600">2</span>
-                                    <span className="pl-4 font-normal text-slate-300">
-                                        <span className="text-purple-400">def</span> <span className="text-yellow-400">findLCA</span>(self, root, p, q):
-                                    </span>
-                                </div>
-                                <div className="flex gap-4">
-                                    <span className="text-slate-600">3</span>
-                                    <span className="pl-8 text-slate-500"># Start your implementation here</span>
-                                </div>
-                                <div className="flex gap-4">
-                                    <span className="text-slate-600">4</span>
-                                    <span className="pl-8 text-white">curr = root</span>
-                                </div>
-                                <div className="flex gap-4">
-                                    <span className="text-slate-600">5</span>
-                                    <span className="pl-8 text-purple-400">while</span> <span className="text-white">curr:</span>
-                                </div>
-                                <div className="mt-8 border-t border-slate-800 pt-4">
-                                    <p className="text-success flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-sm">check_circle</span>
-                                        All 12 test cases passed
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="absolute bottom-6 right-6 w-72 bg-[#1c2127] rounded-xl border border-slate-600 shadow-xl p-4 transform translate-y-0 group hover:-translate-y-1 transition-transform">
-                            <div className="flex items-start gap-3">
-                                <div className="size-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                                    <span className="material-symbols-outlined text-white text-sm">smart_toy</span>
-                                </div>
-                                <div className="space-y-2">
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">AI Interviewer</p>
-                                    <p className="text-sm text-slate-200 leading-snug">
-                                        &quot;Great start! Can you explain the time complexity of your approach if the tree is highly skewed?&quot;
-                                    </p>
-                                    <div className="flex gap-1.5 pt-1">
-                                        <div className="size-1.5 rounded-full bg-primary/50 animate-bounce"></div>
-                                        <div className="size-1.5 rounded-full bg-primary/50 animate-bounce [animation-delay:-0.15s]"></div>
-                                        <div className="size-1.5 rounded-full bg-primary/50 animate-bounce [animation-delay:-0.3s]"></div>
+                                <div className="hidden sm:flex items-center gap-1.5 text-[9px]">
+                                    <span className="text-slate-400 font-bold uppercase tracking-wider">PROGRESS</span>
+                                    <div className="flex gap-0.5">
+                                        <span className="w-2.5 h-1 rounded-full bg-primary"></span>
+                                        <span className="w-2.5 h-1 rounded-full bg-primary/30"></span>
+                                        <span className="w-2.5 h-1 rounded-full bg-primary/10"></span>
                                     </div>
                                 </div>
                             </div>
+                            <div className="flex items-center gap-3">
+                                <span className="bg-[#161b22] px-2 py-0.5 rounded border border-[#30363d] text-[9px] text-slate-400 font-bold">
+                                    PROBLEM DISCUSSION
+                                </span>
+                                <button className="border border-red-500/50 text-red-500 text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-wider select-none cursor-default">
+                                    END
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Main workspace split */}
+                        <div className="flex-1 flex overflow-hidden text-left">
+                            
+                            {/* Left Pane: Problem (5/12 width) */}
+                            <div className="w-5/12 border-r border-[#30363d] p-4 flex flex-col justify-between overflow-y-auto text-[10px] select-none">
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[#0bda5b] font-mono text-[12px] font-bold">14:29</span>
+                                        <span className="bg-emerald-500/10 text-emerald-400 px-1 py-0.2 rounded text-[8px] font-bold uppercase border border-emerald-500/20">Easy</span>
+                                    </div>
+                                    <h4 className="text-sm font-extrabold text-white">Search Insert Position</h4>
+                                    <p className="text-slate-400 leading-relaxed text-[9px]">
+                                        Given a sorted array of distinct integers and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
+                                    </p>
+                                    
+                                    {/* Example terminal box */}
+                                    <div className="bg-[#070b11] border border-[#30363d]/80 rounded-xl p-2.5 font-mono text-[8px] space-y-1">
+                                        <div className="flex items-center justify-between pb-1 border-b border-[#30363d]/50">
+                                            <div className="flex gap-0.5">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500/60"></span>
+                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500/60"></span>
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/60"></span>
+                                            </div>
+                                            <span className="text-slate-500 text-[7px]">bash</span>
+                                        </div>
+                                        <div><span className="text-primary">Input:</span> nums = [1,3,5,6], target = 2</div>
+                                        <div><span className="text-primary">Output:</span> 1</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Pane: Code Editor + Floating AI Bubble (7/12 width) */}
+                            <div className="w-7/12 flex flex-col justify-between overflow-hidden relative">
+                                <div className="flex flex-col flex-1">
+                                    {/* Editor header tab */}
+                                    <div className="bg-[#0d1117] border-b border-[#30363d] px-3 py-2 flex items-center justify-between text-[9px] font-mono select-none">
+                                        <span className="text-slate-300 font-bold flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-xs text-[#f48c06]">description</span>
+                                            approach.md
+                                        </span>
+                                        <span className="text-[#f48c06] flex items-center gap-0.5">
+                                            <span className="w-1 h-1 rounded-full bg-[#f48c06]"></span>
+                                            MARKDOWN MODE
+                                        </span>
+                                    </div>
+
+                                    {/* Editor body */}
+                                    <div className="flex-1 p-3.5 font-mono text-[10px] leading-relaxed text-slate-300 bg-[#070b11]/85">
+                                        <div className="flex gap-2">
+                                            <span className="text-slate-600 select-none">1</span>
+                                            <span>I will use a binary search approach...</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Bottom action bar */}
+                                <div className="border-t border-[#30363d] p-2 flex items-center justify-between bg-[#0d1117]/80 text-[8px]">
+                                    <button className="bg-emerald-500 text-slate-950 font-extrabold px-2 py-1 rounded uppercase tracking-wider cursor-default">
+                                        Review my approach
+                                    </button>
+                                </div>
+
+                                {/* Floating AI Interviewer Bubble */}
+                                <div className="absolute bottom-10 left-3 right-3 bg-[#161b22] border border-[#30363d] rounded-xl p-3 shadow-2xl animate-fade-in-up text-[9px] text-left select-none">
+                                    <div className="flex items-start gap-2">
+                                        <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0">
+                                            <span className="material-symbols-outlined text-white text-[12px]">smart_toy</span>
+                                        </div>
+                                        <div className="space-y-0.5">
+                                            <p className="font-bold text-slate-400">AI Interviewer</p>
+                                            <p className="text-slate-200 leading-snug">
+                                                &quot;Welcome to your technical interview. What is your initial approach to solving this problem?&quot;
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
