@@ -1,5 +1,45 @@
 import React, { useMemo, useState, useEffect } from 'react';
 
+const defaultTraceLogs = [
+    "[METRICS EVALUATION] Analyzed: session execution parameters and timing bounds.",
+    "[DISCUSSION PHASE] Verifying candidate explanation of approach and constraints.",
+    "[CODING PHASE] Parsing code structure and checking compilation logs.",
+    "[REVIEW PHASE] Evaluating optimization proposals and complexity analysis.",
+    "[PENALTY CHECK] Hint penalty rule evaluated. Checked timelines and boundaries.",
+    "[SCORING] Mapped Problem Solving performance to hiring rubrics.",
+    "[SCORING] Mapped Complexity Analysis bounds to Big-O criteria.",
+    "[SCORING] Mapped Communication style and dialogue to rubric.",
+    "[VERDICT] Compiled overall verdict and mapped final recommendation tier."
+];
+
+const categoryRubrics = {
+    problem_solving: [
+        { tier: "9-10 (Strong/Exceptional)", title: "Exceptional / Strong Hire Bar", desc: "Formulated highly optimal approach independently. Implemented elegant, correct, and bug-free code. Had 0 hints and 0 syntax/runtime corrections." },
+        { tier: "7-8 (Clear Pass)", title: "Clear Pass", desc: "Proposed a valid working approach. Implemented working code with only minor bugs or minimal assistance. Needed 0 major hints." },
+        { tier: "5-6 (Marginal/Weak)", title: "Marginal / Weak", desc: "Needed 1-2 hints to arrive at the solution or resolve bugs. Wrote multiple syntax/runtime errors during coding." },
+        { tier: "1-4 (Fail)", title: "Unsatisfactory / Fail", desc: "Wrote fundamentally flawed code, failed to compile, or did not finish the coding phase. Required heavy guidance (>= 3 hints)." }
+    ],
+    complexity_analysis: [
+        { tier: "9-10 (Exceptional)", title: "Exceptional / Flawless", desc: "Identified exact worst-case time AND space complexities using Big-O notation for BOTH the initial approach and final code, providing flawless logical justifications." },
+        { tier: "7-8 (Good)", title: "Good / Pass", desc: "Identified correct complexities, but had minor gaps in reasoning or initially forgot recursive stack space." },
+        { tier: "5-6 (Needs Improvement)", title: "Needs Improvement", desc: "One of time or space complexity was incorrect, or needed prompting to get them correct." },
+        { tier: "1-4 (Unsatisfactory)", title: "Unsatisfactory / Fail", desc: "Got both complexities incorrect, or only got them correct after the interviewer gave them the exact answer." }
+    ],
+    communication: [
+        { tier: "9-10 (Exceptional)", title: "Exceptional / Collaborative", desc: "Proactively explained thought process before coding. Discussed trade-offs, edge cases, and code walk-throughs clearly and fluidly." },
+        { tier: "7-8 (Clear Pass)", title: "Clear Pass", desc: "Clear communication, but required occasional prompting to explain code or approach." },
+        { tier: "5-6 (Marginal/Weak)", title: "Marginal / Weak", desc: "Vague, gave one-word/short answers, or failed to explain their code logic during implementation." },
+        { tier: "1-4 (Fail)", title: "Unsatisfactory / Fail", desc: "Silent for long intervals, refused to explain logic, or only communicated when explicitly prompted." }
+    ]
+};
+
+const getActiveTierIndex = (key, score) => {
+    if (score >= 9) return 0;
+    if (score >= 7) return 1;
+    if (score >= 5) return 2;
+    return 3;
+};
+
 export default function InterviewFeedback({ feedback, reference: propReference }) {
     const data = useMemo(() => {
         if (!feedback) return null;
@@ -90,16 +130,16 @@ export default function InterviewFeedback({ feedback, reference: propReference }
     }
 
     if (isUnpacking) {
-        const tasks = [
-            { label: "Deconstruct conversation transcript", start: 0, end: 25 },
-            { label: "Analyze implementation & edge cases", start: 25, end: 50 },
-            { label: "Evaluate computational complexity", start: 50, end: 75 },
-            { label: "Compile study & improvement plan", start: 75, end: 95 }
-        ];
+        const traceLogs = data?.feedback?.evaluation_trace || defaultTraceLogs;
+        const visibleLinesCount = Math.min(
+            traceLogs.length,
+            Math.floor((progress / 100) * (traceLogs.length + 1))
+        );
+        const visibleLogs = traceLogs.slice(0, visibleLinesCount);
 
         return (
             <div className="w-full min-h-[70vh] flex flex-col items-center justify-center p-4 md:p-8 animate-fade-in">
-                <div className="w-full max-w-lg bg-[#161b22]/40 backdrop-blur-xl border border-[#30363d] rounded-3xl p-8 relative overflow-hidden shadow-2xl">
+                <div className="w-full max-w-2xl bg-[#161b22]/40 backdrop-blur-xl border border-[#30363d] rounded-3xl p-8 relative overflow-hidden shadow-2xl">
                     {/* Glowing background highlights */}
                     <div className="absolute -top-24 -left-24 w-52 h-52 rounded-full bg-[#137fec]/15 blur-3xl pointer-events-none"></div>
                     <div className="absolute -bottom-24 -right-24 w-52 h-52 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none"></div>
@@ -167,39 +207,34 @@ export default function InterviewFeedback({ feedback, reference: propReference }
                         </div>
 
                         {/* Status Message */}
-                        <div className="w-full text-center py-2 px-4 rounded-xl bg-[#0d1117]/60 border border-[#30363d]/50 mb-8 min-h-[48px] flex items-center justify-center">
+                        <div className="w-full text-center py-2 px-4 rounded-xl bg-[#0d1117]/60 border border-[#30363d]/50 mb-4 min-h-[48px] flex items-center justify-center">
                             <span className="text-sm font-semibold text-slate-300 transition-all duration-300">
                                 {statusText}
                             </span>
                         </div>
 
-                        {/* Checklist of tasks */}
-                        <div className="w-full space-y-3.5 border-t border-[#30363d]/50 pt-6">
-                            {tasks.map((task, idx) => {
-                                const isDone = progress >= task.end;
-                                const isActive = progress >= task.start && progress < task.end;
-                                return (
-                                    <div key={idx} className="flex items-center gap-3 transition-all duration-300">
-                                        {isDone ? (
-                                            <span className="material-symbols-outlined text-emerald-400 text-lg shrink-0 transition-transform duration-300 scale-100">check_circle</span>
-                                        ) : isActive ? (
-                                            <div className="w-5 h-5 flex items-center justify-center shrink-0">
-                                                <div className="w-2.5 h-2.5 rounded-full bg-[#137fec] animate-ping absolute"></div>
-                                                <div className="w-2 h-2 rounded-full bg-[#137fec] relative"></div>
-                                            </div>
-                                        ) : (
-                                            <span className="material-symbols-outlined text-slate-600 text-lg shrink-0">radio_button_unchecked</span>
-                                        )}
-                                        <span className={`text-xs font-semibold tracking-wide transition-all ${
-                                            isDone ? "text-slate-300" :
-                                            isActive ? "text-[#137fec] font-bold" :
-                                            "text-slate-500"
-                                        }`}>
-                                            {task.label}
-                                        </span>
+                        {/* Terminal Log Console */}
+                        <div className="w-full bg-[#0d1117]/80 border border-[#30363d] rounded-2xl p-4 font-mono text-[10px] md:text-xs text-emerald-400/90 mt-4 h-56 overflow-y-auto flex flex-col gap-1.5 shadow-inner select-text text-left">
+                            <div className="flex items-center gap-1.5 border-b border-[#30363d] pb-2 mb-2 select-none">
+                                <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80"></div>
+                                <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+                                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
+                                <span className="text-[9px] text-slate-500 ml-2 font-bold uppercase tracking-wider">EVALUATION_PROCESSOR_LOG</span>
+                            </div>
+                            <div className="flex-1 flex flex-col gap-1 overflow-y-auto custom-scrollbar animate-pulse-subtle">
+                                {visibleLogs.map((log, idx) => (
+                                    <div key={idx} className="flex gap-2 leading-relaxed">
+                                        <span className="text-slate-600 select-none">&gt;</span>
+                                        <span>{log}</span>
                                     </div>
-                                );
-                            })}
+                                ))}
+                                {progress < 100 && (
+                                    <div className="flex gap-2 text-emerald-400 animate-pulse">
+                                        <span className="text-slate-600 select-none">&gt;</span>
+                                        <span className="w-1.5 h-3.5 bg-emerald-400"></span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -208,7 +243,7 @@ export default function InterviewFeedback({ feedback, reference: propReference }
     }
 
     const { feedback: f } = data;
-    const { session_summary, scores, strengths, weaknesses, key_metrics, final_verdict } = f;
+    const { session_summary, scores, strengths, weaknesses, key_metrics, final_verdict, evaluation_trace } = f;
     const reference = propReference || data?.reference;
 
     // Helper to format time
@@ -318,7 +353,8 @@ export default function InterviewFeedback({ feedback, reference: propReference }
                         {[
                             { id: 'overview', label: 'AI Overview', icon: 'psychology' },
                             { id: 'metrics', label: 'Metrics & Benchmarks', icon: 'analytics' },
-                            { id: 'reference', label: 'Reference Solution', icon: 'menu_book' }
+                            { id: 'reference', label: 'Reference Solution', icon: 'menu_book' },
+                            { id: 'trace', label: 'AI Evaluation Log', icon: 'terminal' }
                         ].map((tab) => {
                             const isActive = activeTab === tab.id;
                             return (
@@ -379,33 +415,133 @@ export default function InterviewFeedback({ feedback, reference: propReference }
                                     )}
 
                                     {/* Using scores grouping for additional context if needed */}
-                                    <div className="space-y-3 pt-2">
+                                    <div className="space-y-6 pt-2">
                                         <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2 mb-3">
                                             <span className="w-1.5 h-1.5 rounded-full bg-[#137fec]"></span>
-                                            Detailed Category Rubric
+                                            Detailed Category Rubrics
                                         </h4>
-                                        {Object.entries(scores || {}).map(([key, val]) => (
-                                            val.notes && val.score > 0 && (
-                                                <div key={key} className="p-4 rounded-xl bg-white/[0.01] border border-white/5 relative overflow-hidden group hover:bg-white/[0.02] transition-all duration-300">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <h4 className="text-sm font-bold text-slate-200 flex items-center gap-2 capitalize">
-                                                            <span className={`w-2 h-2 rounded-full ${val.score >= 8 ? 'bg-emerald-500' : val.score >= 5 ? 'bg-amber-500' : 'bg-rose-500'}`}></span>
-                                                            {key.replace('_', ' ')}
-                                                        </h4>
-                                                        <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded border ${
-                                                            val.score >= 8
-                                                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                                                : val.score >= 5
-                                                                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                                                                    : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                                                        }`}>
-                                                            {val.score} / 10
-                                                        </span>
+                                        {Object.entries(scores || {}).map(([key, val]) => {
+                                            if (!val || val.score === undefined) return null;
+                                            
+                                            const rubricKey = key === "problem_solving" ? "problem_solving" : 
+                                                              key === "complexity_analysis" ? "complexity_analysis" : 
+                                                              "communication";
+                                                              
+                                            const rubricList = categoryRubrics[rubricKey];
+                                            const activeTierIdx = getActiveTierIndex(rubricKey, val.score);
+                                            
+                                            // Handle backward compatibility
+                                            const justificationText = val.justification || val.notes || "";
+                                            const steps = val.improvement_steps || [
+                                                "Practice explaining trade-offs for different approaches.",
+                                                "Ensure edge cases are validated before jumping to code implementation.",
+                                                "Review time and space complexity bounds of common algorithm patterns."
+                                            ];
+
+                                            return (
+                                                <div key={key} className="p-6 rounded-2xl bg-[#161b22]/30 border border-white/5 space-y-6 hover:bg-[#161b22]/50 transition-all duration-300 text-left">
+                                                    {/* Category Header */}
+                                                    <div className="flex items-center justify-between pb-4 border-b border-white/5">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`w-3 h-3 rounded-full ${
+                                                                val.score >= 8 ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 
+                                                                val.score >= 5 ? 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]' : 
+                                                                'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]'
+                                                            }`}></div>
+                                                            <h4 className="text-base font-bold text-slate-100 capitalize">
+                                                                {key.replace('_', ' ')}
+                                                            </h4>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs text-slate-500 font-medium">Score:</span>
+                                                            <span className={`font-mono text-sm font-extrabold px-3 py-1 rounded-xl border ${
+                                                                val.score >= 8
+                                                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                                                    : val.score >= 5
+                                                                        ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                                                        : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                                                            }`}>
+                                                                {val.score} / 10
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                    <p className="text-xs text-slate-400 leading-relaxed ml-4">{val.notes}</p>
+
+                                                    {/* Rubric Tiers & Justification Grid */}
+                                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                                        {/* Hiring Rubric Expectations */}
+                                                        <div className="space-y-3">
+                                                            <h5 className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
+                                                                <span className="material-symbols-outlined text-xs">tune</span>
+                                                                MAANG Hiring Rubric Tiers
+                                                            </h5>
+                                                            <div className="space-y-2">
+                                                                {rubricList && rubricList.map((tierItem, tIdx) => {
+                                                                    const isActive = tIdx === activeTierIdx;
+                                                                    return (
+                                                                        <div 
+                                                                            key={tIdx} 
+                                                                            className={`p-3 rounded-xl border transition-all duration-300 relative overflow-hidden ${
+                                                                                isActive 
+                                                                                    ? 'border-emerald-500/30 bg-emerald-500/[0.04] shadow-md shadow-emerald-500/[0.02]' 
+                                                                                    : 'border-white/5 bg-transparent opacity-45 hover:opacity-75'
+                                                                            }`}
+                                                                        >
+                                                                            {isActive && (
+                                                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                                                                                    <span className="text-[8px] font-mono font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/20">Active</span>
+                                                                                </div>
+                                                                            )}
+                                                                            <div className="flex items-start gap-2.5">
+                                                                                <span className={`material-symbols-outlined text-sm mt-0.5 shrink-0 ${isActive ? 'text-emerald-400' : 'text-slate-600'}`}>
+                                                                                    {isActive ? 'check_circle' : 'circle'}
+                                                                                </span>
+                                                                                <div>
+                                                                                    <div className="flex items-center gap-1.5">
+                                                                                        <span className={`text-[11px] font-mono font-bold ${isActive ? 'text-emerald-300' : 'text-slate-400'}`}>{tierItem.tier}</span>
+                                                                                        <span className={`text-[10px] font-semibold ${isActive ? 'text-white' : 'text-slate-500'}`}>{tierItem.title}</span>
+                                                                                    </div>
+                                                                                    <p className="text-[10px] text-slate-400 leading-relaxed mt-1">{tierItem.desc}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Justification & Action Items */}
+                                                        <div className="flex flex-col gap-4">
+                                                            {/* Interviewer Critical Assessment */}
+                                                            <div className="p-4 rounded-xl bg-slate-900/40 border border-white/5 flex-1">
+                                                                <h5 className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 flex items-center gap-1.5 mb-2.5">
+                                                                    <span className="material-symbols-outlined text-xs">gavel</span>
+                                                                    Interviewer Critical Assessment
+                                                                </h5>
+                                                                <p className="text-xs text-slate-300 leading-relaxed italic">
+                                                                    "{justificationText}"
+                                                                </p>
+                                                            </div>
+
+                                                            {/* Actionable Improvement Checklist */}
+                                                            <div className="p-4 rounded-xl bg-slate-900/40 border border-white/5">
+                                                                <h5 className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 flex items-center gap-1.5 mb-2.5">
+                                                                    <span className="material-symbols-outlined text-xs text-amber-500 animate-pulse">trending_up</span>
+                                                                    Action Items to Achieve Next Level
+                                                                </h5>
+                                                                <ul className="space-y-2 select-text">
+                                                                    {steps.map((step, sIdx) => (
+                                                                        <li key={sIdx} className="text-xs text-slate-400 flex items-start gap-2">
+                                                                            <span className="material-symbols-outlined text-amber-500 text-sm mt-0.5 shrink-0 select-none">play_arrow</span>
+                                                                            <span>{step}</span>
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            )
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>
@@ -532,6 +668,40 @@ export default function InterviewFeedback({ feedback, reference: propReference }
                                         </div>
                                     </div>
                                 )}
+                            </div>
+                        )}
+
+                        {activeTab === 'trace' && (
+                            <div className="space-y-6 animate-fade-in text-left">
+                                <div className="flex items-center gap-3 pb-4 border-b border-white/5">
+                                    <div className="w-10 h-10 rounded-lg bg-[#10b981]/10 text-[#10b981] flex items-center justify-center border border-[#10b981]/20">
+                                        <span className="material-symbols-outlined">terminal</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-lg text-slate-200">AI Evaluation Trace Log</h3>
+                                        <p className="text-xs text-slate-500">Chronological telemetry checks compiled by the AI agent</p>
+                                    </div>
+                                </div>
+                                <div className="border border-white/5 bg-[#080b11]/90 rounded-2xl overflow-hidden shadow-2xl relative font-mono text-[10px] md:text-xs text-emerald-400 p-6 space-y-2 h-[420px] overflow-y-auto custom-scrollbar select-text">
+                                    <div className="flex items-center justify-between pb-4 border-b border-white/5 mb-4 select-none">
+                                        <div className="flex items-center gap-1.5">
+                                            <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80"></div>
+                                            <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
+                                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
+                                            <span className="text-[9px] text-slate-500 ml-2">evaluation_pipeline.log</span>
+                                        </div>
+                                    </div>
+                                    {(evaluation_trace || defaultTraceLogs).map((log, idx) => (
+                                        <div key={idx} className="flex gap-2 leading-relaxed">
+                                            <span className="text-slate-600 select-none">&gt;</span>
+                                            <span>{log}</span>
+                                        </div>
+                                    ))}
+                                    <div className="flex gap-2 text-emerald-500/50 italic pt-4 select-none">
+                                        <span className="text-slate-600 select-none">&gt;</span>
+                                        <span>[PROCESS] Pipeline execution complete. Report generated.</span>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
