@@ -525,6 +525,53 @@ ${message}
     }
   }
 
+  const handleRequestHint = async () => {
+    handleAddMessage("Could you please give me a hint?", "user");
+
+    const notepadContent = sessionStorage.getItem(`interview.notepad.${sessionId}`) || "";
+
+    const contextWrappedMessage = `
+[CURRENT CONTEXT]
+Language: ${language}
+Notepad/Approach: ${notepadContent}
+Current Implementation:
+\`\`\`${language}
+${code}
+\`\`\`
+
+[USER MESSAGE]
+Can you please give me a hint? Analyze my progress/code and nudge me in the right direction.
+`;
+
+    try {
+      setLoadingType('MESSAGE');
+      const res = await api.post("/interview/hint", {
+        session_id: sessionId,
+        message: contextWrappedMessage,
+        code: code,
+        language: language,
+        role: "user",
+        time_expired: timeoutState.timeExpired,
+        extra_time_used: timeoutState.extraTimeUsed,
+        extension_count: timeoutState.extensionCount,
+        session_ended_by: "NORMAL",
+      });
+
+      if (res?.data?.response) {
+        handleAddMessage(res.data.response, "ai");
+      }
+      syncFromAgentResponse(res?.data);
+      if (attachedSelection) {
+        setAttachedSelection("");
+        setSelectionWasTruncated(false);
+      }
+    } catch (error) {
+      showError(error, "requesting hint");
+    } finally {
+      setLoadingType(null);
+    }
+  }
+
   const handleAttachSelection = () => {
     const trimmedSelection = editorSelection.trim();
     if (!trimmedSelection) return;
@@ -676,6 +723,7 @@ ${message}
             onClearSelection={handleClearSelection}
             loadingType={loadingType}
             setLoadingType={setLoadingType}
+            onRequestHint={handleRequestHint}
           ></InterviewRightSidebar>
         </main>
       ) : (

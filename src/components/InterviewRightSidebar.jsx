@@ -11,7 +11,8 @@ export default function InterviewRightSidebar({
     selectionWasTruncated,
     onAttachSelection,
     onClearSelection,
-    loadingType
+    loadingType,
+    onRequestHint
 }) {
     return (
         <div className="w-[500px] h-full flex flex-col border-l border-white/5 glass-panel min-h-0">
@@ -26,6 +27,7 @@ export default function InterviewRightSidebar({
                     onAttachSelection={onAttachSelection}
                     onClearSelection={onClearSelection}
                     loadingType={loadingType}
+                    onRequestHint={onRequestHint}
                 />
             </div>
         </div>

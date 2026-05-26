@@ -14,7 +14,8 @@ export default function AIChatWindow({
     selectionWasTruncated,
     onAttachSelection,
     onClearSelection,
-    loadingType
+    loadingType,
+    onRequestHint
 }) {
     const scrollRef = useRef(null);
     const nearBottomRef = useRef(true);
@@ -136,7 +137,11 @@ export default function AIChatWindow({
                     curr_phase={curr_phase}
                 ></UserChatInput>
                 <div className="flex items-center justify-between mt-3 px-1">
-                    <button className="flex items-center gap-1.5 text-slate-500 hover:text-primary transition-colors">
+                    <button 
+                        onClick={onRequestHint}
+                        disabled={loadingType !== null}
+                        className="flex items-center gap-1.5 text-slate-500 hover:text-primary disabled:opacity-50 disabled:pointer-events-none transition-colors cursor-pointer"
+                    >
                         <span className="material-symbols-outlined text-sm">help</span>
                         <span className="text-[10px] font-bold uppercase tracking-tight">Request Hint</span>
                     </button>
