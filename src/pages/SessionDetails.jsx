@@ -67,8 +67,8 @@ export default function SessionDetails() {
             }
 
             if (feedbackRes.status === "fulfilled") {
-                const payload = feedbackRes.value?.data?.feedback;
-                setFeedback(payload ? { feedback: payload } : null);
+                const payload = feedbackRes.value?.data;
+                setFeedback(payload ?? null);
             } else {
                 setFeedback(null);
             }

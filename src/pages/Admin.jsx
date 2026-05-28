@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import api from '../components/Api';
@@ -26,12 +26,14 @@ export default function Admin({ isUser }) {
     const [toast, setToast] = useState(null);
 
     // Form state
-    const [form, setForm] = useState({ title: '', statement: '', example: '', difficulty: 'Medium', expected_time: 30, topics: [], leetcode_slug: '', leetcode_url: '' });
+    const [form, setForm] = useState({ title: '', statement: '', example: '', difficulty: 'Medium', expected_time: 30, topics: [], leetcode_slug: '', leetcode_url: '', code_snippets: null, meta_data: null, example_testcases: '', sample_testcase: '', hidden_testcases: '' });
     const [topicInput, setTopicInput] = useState('');
     const [showRef, setShowRef] = useState(false);
-    const [refForm, setRefForm] = useState({ optimal_approach: '', time_complexity: '', space_complexity: '', key_insights: '', common_pitfalls: '', pseudocode: '' });
+    const [refForm, setRefForm] = useState({ optimal_approach: '', time_complexity: '', space_complexity: '', key_insights: '', common_pitfalls: '', pseudocode: '', pseudocode_cpp: '', pseudocode_java: '' });
     const [refExists, setRefExists] = useState(false);
     const [refSaving, setRefSaving] = useState(false);
+    const [testCases, setTestCases] = useState([]);
+    const [showTestCases, setShowTestCases] = useState(false);
     
     // LeetCode seeding state
     const [seedInput, setSeedInput] = useState('');
@@ -53,7 +55,12 @@ export default function Admin({ isUser }) {
                 expected_time: data.expected_time || 30,
                 topics: data.topics || [],
                 leetcode_slug: data.leetcode_slug || '',
-                leetcode_url: data.leetcode_url || ''
+                leetcode_url: data.leetcode_url || '',
+                code_snippets: data.code_snippets || null,
+                meta_data: data.meta_data || null,
+                example_testcases: data.example_testcases || '',
+                sample_testcase: data.sample_testcase || '',
+                hidden_testcases: data.hidden_testcases || ''
             });
             
             // Auto-fill reference form state
@@ -63,7 +70,9 @@ export default function Admin({ isUser }) {
                 space_complexity: data.space_complexity || 'O(1)',
                 key_insights: data.key_insights || '',
                 common_pitfalls: data.common_pitfalls || '',
-                pseudocode: data.pseudocode || ''
+                pseudocode: data.pseudocode || '',
+                pseudocode_cpp: data.pseudocode_cpp || '',
+                pseudocode_java: data.pseudocode_java || ''
             });
             
             setEditingProblem(null); // It is a new problem
@@ -128,10 +137,12 @@ export default function Admin({ isUser }) {
     // Open create modal
     const openCreate = () => {
         setEditingProblem(null);
-        setForm({ title: '', statement: '', example: '', difficulty: 'Medium', expected_time: 30, topics: [], leetcode_slug: '', leetcode_url: '' });
+        setForm({ title: '', statement: '', example: '', difficulty: 'Medium', expected_time: 30, topics: [], leetcode_slug: '', leetcode_url: '', code_snippets: null, meta_data: null, example_testcases: '', sample_testcase: '', hidden_testcases: '' });
         setShowRef(false);
-        setRefForm({ optimal_approach: '', time_complexity: '', space_complexity: '', key_insights: '', common_pitfalls: '', pseudocode: '' });
+        setRefForm({ optimal_approach: '', time_complexity: '', space_complexity: '', key_insights: '', common_pitfalls: '', pseudocode: '', pseudocode_cpp: '', pseudocode_java: '' });
         setRefExists(false);
+        setTestCases([]);
+        setShowTestCases(false);
         setShowModal(true);
     };
 
@@ -141,20 +152,37 @@ export default function Admin({ isUser }) {
         setForm({
             title: p.title, statement: p.statement, example: p.example,
             difficulty: p.difficulty, expected_time: p.expected_time, topics: [...p.topics],
-            leetcode_slug: p.leetcode_slug || '', leetcode_url: p.leetcode_url || ''
+            leetcode_slug: p.leetcode_slug || '', leetcode_url: p.leetcode_url || '',
+            code_snippets: p.code_snippets || null, meta_data: p.meta_data || null,
+            example_testcases: p.example_testcases || '', sample_testcase: p.sample_testcase || '',
+            hidden_testcases: p.hidden_testcases || ''
         });
         setShowModal(true);
+        setShowTestCases(false);
+        setTestCases([]);
         // Fetch full problem with reference
         try {
             const res = await api.get(`/admin/problems/${p.problem_id}`);
+            const data = res.data;
+            setForm(f => ({
+                ...f,
+                code_snippets: data.code_snippets || null,
+                meta_data: data.meta_data || null,
+                example_testcases: data.example_testcases || '',
+                sample_testcase: data.sample_testcase || '',
+                hidden_testcases: data.hidden_testcases || ''
+            }));
             if (res.data.reference) {
                 setRefForm(res.data.reference);
                 setRefExists(true);
                 setShowRef(true);
             } else {
-                setRefForm({ optimal_approach: '', time_complexity: '', space_complexity: '', key_insights: '', common_pitfalls: '', pseudocode: '' });
+                setRefForm({ optimal_approach: '', time_complexity: '', space_complexity: '', key_insights: '', common_pitfalls: '', pseudocode: '', pseudocode_cpp: '', pseudocode_java: '' });
                 setRefExists(false);
                 setShowRef(false);
+            }
+            if (res.data.test_cases) {
+                setTestCases(res.data.test_cases);
             }
         } catch { /* ignore */ }
     };
@@ -168,7 +196,12 @@ export default function Admin({ isUser }) {
         setSaving(true);
         try {
             if (editingProblem) {
-                await api.put(`/admin/problems/${editingProblem.problem_id}`, form);
+                const payload = {
+                    ...form,
+                    pseudocode_cpp: refForm.pseudocode_cpp || null,
+                    pseudocode_java: refForm.pseudocode_java || null,
+                };
+                await api.put(`/admin/problems/${editingProblem.problem_id}`, payload);
                 showToast('Problem updated');
             } else {
                 const payload = {
@@ -178,7 +211,9 @@ export default function Admin({ isUser }) {
                     space_complexity: refForm.space_complexity || null,
                     key_insights: refForm.key_insights || null,
                     common_pitfalls: refForm.common_pitfalls || null,
-                    pseudocode: refForm.pseudocode || null
+                    pseudocode: refForm.pseudocode || null,
+                    pseudocode_cpp: refForm.pseudocode_cpp || null,
+                    pseudocode_java: refForm.pseudocode_java || null,
                 };
                 await api.post('/admin/problems', payload);
                 showToast('Problem created');
@@ -231,7 +266,7 @@ export default function Admin({ isUser }) {
             await api.delete(`/admin/problems/${editingProblem.problem_id}/reference`);
             showToast('Reference deleted');
             setRefExists(false);
-            setRefForm({ optimal_approach: '', time_complexity: '', space_complexity: '', key_insights: '', common_pitfalls: '', pseudocode: '' });
+            setRefForm({ optimal_approach: '', time_complexity: '', space_complexity: '', key_insights: '', common_pitfalls: '', pseudocode: '', pseudocode_cpp: '', pseudocode_java: '' });
         } catch (err) {
             showToast(err.response?.data?.detail || 'Failed to delete reference', 'error');
         }
@@ -389,7 +424,7 @@ export default function Admin({ isUser }) {
                                             </thead>
                                             <tbody>
                                                 {groupedProblems.map(([topic, items]) => (
-                                                    <>
+                                                    <Fragment key={`topic-group-${topic}`}>
                                                         {/* Topic group divider */}
                                                         <tr key={`group-${topic}`} className="bg-[#0d1117]/60">
                                                             <td colSpan={6} className="px-6 py-2">
@@ -435,7 +470,7 @@ export default function Admin({ isUser }) {
                                                                 </tr>
                                                             );
                                                         })}
-                                                    </>
+                                                    </Fragment>
                                                 ))}
                                             </tbody>
                                         </table>
@@ -502,6 +537,23 @@ export default function Admin({ isUser }) {
                                 </div>
                             </div>
 
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className={labelClass}>Example Testcases</label>
+                                    <textarea className={textareaClass + " font-mono text-xs"} rows={4} placeholder="[2,7,11,15]&#10;9" value={form.example_testcases || ''} onChange={e => setForm(f => ({ ...f, example_testcases: e.target.value }))} />
+                                </div>
+                                <div>
+                                    <label className={labelClass}>Sample Testcase</label>
+                                    <textarea className={textareaClass + " font-mono text-xs"} rows={4} placeholder="[2,7,11,15]&#10;9" value={form.sample_testcase || ''} onChange={e => setForm(f => ({ ...f, sample_testcase: e.target.value }))} />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className={labelClass}>Hidden Test Cases</label>
+                                <textarea className={textareaClass + " font-mono text-xs"} rows={5} placeholder="[2,7,11,15]&#10;9&#10;[3,2,4]&#10;6" value={form.hidden_testcases || ''} onChange={e => setForm(f => ({ ...f, hidden_testcases: e.target.value }))} />
+                                <p className="text-[10px] text-slate-500 mt-1">Each testcase should consist of parameter values in order, separated by newlines.</p>
+                            </div>
+
                             {/* Topics */}
                             <div>
                                 <label className={labelClass}>Topics</label>
@@ -555,8 +607,16 @@ export default function Admin({ isUser }) {
                                                 <textarea className={textareaClass} rows={2} placeholder="Forgetting to handle duplicates…" value={refForm.common_pitfalls} onChange={e => setRefForm(f => ({ ...f, common_pitfalls: e.target.value }))} />
                                             </div>
                                             <div>
-                                                <label className={labelClass}>Pseudocode</label>
-                                                <textarea className={textareaClass + " font-mono text-xs"} rows={6} placeholder="sort(arr)&#10;left = 0, right = n-1&#10;while left < right:&#10;  ..." value={refForm.pseudocode} onChange={e => setRefForm(f => ({ ...f, pseudocode: e.target.value }))} />
+                                                <label className={labelClass}>Pseudocode (Python)</label>
+                                                <textarea className={textareaClass + " font-mono text-xs"} rows={6} placeholder="sort(arr)&#10;left = 0, right = n-1&#10;while left < right:&#10;  ..." value={refForm.pseudocode || ''} onChange={e => setRefForm(f => ({ ...f, pseudocode: e.target.value }))} />
+                                            </div>
+                                            <div>
+                                                <label className={labelClass}>C++ Reference Solution</label>
+                                                <textarea className={textareaClass + " font-mono text-xs"} rows={6} placeholder="class Solution { ... }" value={refForm.pseudocode_cpp || ''} onChange={e => setRefForm(f => ({ ...f, pseudocode_cpp: e.target.value }))} />
+                                            </div>
+                                            <div>
+                                                <label className={labelClass}>Java Reference Solution</label>
+                                                <textarea className={textareaClass + " font-mono text-xs"} rows={6} placeholder="class Solution { ... }" value={refForm.pseudocode_java || ''} onChange={e => setRefForm(f => ({ ...f, pseudocode_java: e.target.value }))} />
                                             </div>
                                             {editingProblem && (
                                                 <div className="flex items-center gap-3">
@@ -573,6 +633,52 @@ export default function Admin({ isUser }) {
                                         </div>
                                     )}
                                 </div>
+                                
+                                {/* ── Hidden Test Cases ── */}
+                                {editingProblem && (
+                                    <div className="border-t border-[#30363d] pt-4 mt-4">
+                                        <button type="button" onClick={() => setShowTestCases(t => !t)} className="flex items-center gap-2 text-sm font-bold text-slate-300 hover:text-white transition-colors cursor-pointer w-full text-left">
+                                            <span className="material-symbols-outlined text-base transition-transform" style={{ transform: showTestCases ? 'rotate(90deg)' : 'rotate(0)' }}>chevron_right</span>
+                                            Hidden Test Cases
+                                            {testCases.length > 0 && (
+                                                <span className="text-[9px] text-[#137fec] font-black bg-[#137fec]/10 border border-[#137fec]/20 px-2 py-0.5 rounded-full ml-1">
+                                                    {testCases.length} SEEDED
+                                                </span>
+                                            )}
+                                        </button>
+
+                                        {showTestCases && (
+                                            <div className="mt-4 space-y-3 pl-1">
+                                                {testCases.length === 0 ? (
+                                                    <p className="text-xs text-slate-500 italic">No hidden test cases seeded for this problem yet. (They are automatically generated when you import or create a problem with a reference solution).</p>
+                                                ) : (
+                                                    <div className="grid grid-cols-1 gap-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+                                                        {testCases.map((tc, idx) => (
+                                                            <div key={tc.test_case_id || idx} className="bg-[#0d1117] border border-[#30363d] rounded-xl p-3.5 space-y-2 text-xs">
+                                                                <div className="flex items-center justify-between">
+                                                                    <span className="font-bold text-[#137fec]">Test Case #{idx + 1}</span>
+                                                                    {tc.is_edge_case && (
+                                                                        <span className="text-[9px] font-black tracking-wider uppercase bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded border border-rose-500/20">Edge Case</span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="grid grid-cols-2 gap-4">
+                                                                    <div className="space-y-1">
+                                                                        <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Input Arguments</span>
+                                                                        <pre className="p-2 bg-[#161b22] border border-[#30363d]/50 rounded-lg text-slate-300 font-mono text-[10px] overflow-x-auto custom-scrollbar select-all whitespace-pre-wrap">{tc.input_args}</pre>
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Expected Output</span>
+                                                                        <pre className="p-2 bg-[#161b22] border border-[#30363d]/50 rounded-lg text-emerald-400 font-mono text-[10px] overflow-x-auto custom-scrollbar select-all whitespace-pre-wrap">{tc.expected_output}</pre>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
 

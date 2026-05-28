@@ -40,7 +40,7 @@ const getActiveTierIndex = (key, score) => {
     return 3;
 };
 
-export default function InterviewFeedback({ feedback, reference: propReference }) {
+export default function InterviewFeedback({ feedback, reference: propReference, language: userLanguage }) {
     const data = useMemo(() => {
         if (!feedback) return null;
         if (typeof feedback === 'string') {
@@ -60,10 +60,41 @@ export default function InterviewFeedback({ feedback, reference: propReference }
     const [hasTriggered, setHasTriggered] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
     const [copied, setCopied] = useState(false);
+    const [selectedLang, setSelectedLang] = useState(userLanguage || 'python');
+
+    useEffect(() => {
+        if (userLanguage) {
+            setSelectedLang(userLanguage);
+        }
+    }, [userLanguage]);
+
+    const getCodeForLanguage = (lang) => {
+        if (!reference) return '';
+        const normalized = lang.toLowerCase();
+        if (normalized === 'cpp' || normalized === 'c++') {
+            return reference.pseudocode_cpp || '';
+        }
+        if (normalized === 'java') {
+            return reference.pseudocode_java || '';
+        }
+        return reference.pseudocode || '';
+    };
+
+    const getFilenameForLanguage = (lang) => {
+        const normalized = lang.toLowerCase();
+        if (normalized === 'cpp' || normalized === 'c++') {
+            return 'solution.cpp';
+        }
+        if (normalized === 'java') {
+            return 'Solution.java';
+        }
+        return 'solution.py';
+    };
 
 
     const sessionId = data?.session_summary?.session_id || 'default';
     const sessionKey = `interview.unpacked.${sessionId}`;
+    const testCases = useMemo(() => data?.test_cases || data?.feedback?.test_cases || [], [data]);
 
     useEffect(() => {
         if (data && data.feedback && !hasTriggered) {
@@ -254,8 +285,9 @@ export default function InterviewFeedback({ feedback, reference: propReference }
     };
 
     const handleCopyCode = () => {
-        if (reference?.pseudocode) {
-            navigator.clipboard.writeText(reference.pseudocode);
+        const codeToCopy = getCodeForLanguage(selectedLang);
+        if (codeToCopy) {
+            navigator.clipboard.writeText(codeToCopy);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         }
@@ -287,7 +319,7 @@ export default function InterviewFeedback({ feedback, reference: propReference }
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 animate-fade-in select-none">
+        <div className="w-full max-w-[1400px] mx-auto space-y-8 animate-fade-in select-none">
             {/* Hero Section */}
             <div className="relative overflow-hidden rounded-2xl border border-white/5 glass-panel p-8">
                 {/* Visual Accent Overlay */}
@@ -352,6 +384,7 @@ export default function InterviewFeedback({ feedback, reference: propReference }
                     <div className="flex border-b border-white/5 bg-white/[0.01] px-4 pt-3 gap-2 select-none shrink-0">
                         {[
                             { id: 'overview', label: 'AI Overview', icon: 'psychology' },
+                            { id: 'test_cases', label: 'Test Case Results', icon: 'playlist_add_check' },
                             { id: 'metrics', label: 'Metrics & Benchmarks', icon: 'analytics' },
                             { id: 'reference', label: 'Reference Solution', icon: 'menu_book' },
                             { id: 'trace', label: 'AI Evaluation Log', icon: 'terminal' }
@@ -486,11 +519,6 @@ export default function InterviewFeedback({ feedback, reference: propReference }
                                                                                     : 'border-white/5 bg-transparent opacity-45 hover:opacity-75'
                                                                             }`}
                                                                         >
-                                                                            {isActive && (
-                                                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                                                                                    <span className="text-[8px] font-mono font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/20">Active</span>
-                                                                                </div>
-                                                                            )}
                                                                             <div className="flex items-start gap-2.5">
                                                                                 <span className={`material-symbols-outlined text-sm mt-0.5 shrink-0 ${isActive ? 'text-emerald-400' : 'text-slate-600'}`}>
                                                                                     {isActive ? 'check_circle' : 'circle'}
@@ -544,6 +572,95 @@ export default function InterviewFeedback({ feedback, reference: propReference }
                                         })}
                                     </div>
                                 </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'test_cases' && (
+                            <div className="space-y-6 animate-fade-in text-left">
+                                <div className="flex items-center justify-between pb-4 border-b border-white/5">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-lg bg-[#137fec]/10 text-[#137fec] flex items-center justify-center border border-[#137fec]/20">
+                                            <span className="material-symbols-outlined">playlist_add_check</span>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg text-slate-200">Hidden Test Case Results</h3>
+                                            <p className="text-xs text-slate-500">Evaluation outcome of your code against sandboxed edge-cases</p>
+                                        </div>
+                                    </div>
+                                    {testCases && testCases.length > 0 && (
+                                        <div className="flex items-center gap-2 bg-[#161b22]/80 border border-[#30363d] px-4 py-2 rounded-xl">
+                                            <span className="text-xs text-slate-500 font-bold uppercase">Pass Rate:</span>
+                                            <span className={`font-mono font-black text-sm ${
+                                                testCases.filter(tc => tc.passed).length === testCases.length ? "text-emerald-400" :
+                                                testCases.filter(tc => tc.passed).length >= Math.max(1, Math.floor(testCases.length * 0.7)) ? "text-amber-400" : "text-rose-400"
+                                            }`}>
+                                                {testCases.filter(tc => tc.passed).length} / {testCases.length} Passed
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {!testCases || testCases.length === 0 ? (
+                                    <div className="p-12 text-center bg-[#161b22]/30 border border-white/5 rounded-2xl">
+                                        <span className="material-symbols-outlined text-slate-700 text-5xl mb-3 block">inventory_2</span>
+                                        <p className="text-slate-500 text-sm">No silent test case outcomes recorded for this session.</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 gap-3 max-h-[500px] overflow-y-auto custom-scrollbar pr-1">
+                                        {testCases.map((tc, idx) => (
+                                            <div key={idx} className={`border rounded-2xl p-4 space-y-3 transition-colors duration-300 ${
+                                                tc.passed 
+                                                    ? "bg-emerald-500/[0.02] border-emerald-500/10 hover:border-emerald-500/20" 
+                                                    : "bg-rose-500/[0.02] border-rose-500/10 hover:border-rose-500/20"
+                                            }`}>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`w-2.5 h-2.5 rounded-full ${tc.passed ? "bg-emerald-500" : "bg-rose-500"}`}></span>
+                                                        <span className="font-extrabold text-sm text-slate-200">Test Case #{idx + 1}</span>
+                                                        {tc.is_edge_case && (
+                                                            <span className="text-[9px] font-black tracking-wider uppercase bg-violet-500/10 text-violet-400 px-2 py-0.5 rounded border border-violet-500/20">Edge Case</span>
+                                                        )}
+                                                    </div>
+                                                    <span className={`text-[10px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full border ${
+                                                        tc.passed 
+                                                            ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" 
+                                                            : "text-rose-400 bg-rose-500/10 border-rose-500/20"
+                                                    }`}>
+                                                        {tc.passed ? "PASSED" : "FAILED"}
+                                                    </span>
+                                                </div>
+
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-1.5 flex flex-col items-start">
+                                                        <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Input Arguments</span>
+                                                        <pre className="w-full p-2.5 bg-slate-900/60 border border-white/5 rounded-xl text-slate-300 font-mono text-[10px] overflow-x-auto custom-scrollbar select-all whitespace-pre-wrap text-left">{tc.input}</pre>
+                                                    </div>
+                                                    <div className="space-y-1.5 flex flex-col items-start">
+                                                        <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Expected Return Value</span>
+                                                        <pre className="w-full p-2.5 bg-slate-900/60 border border-white/5 rounded-xl text-emerald-400 font-mono text-[10px] overflow-x-auto custom-scrollbar select-all whitespace-pre-wrap text-left">{tc.expected}</pre>
+                                                    </div>
+                                                </div>
+
+                                                {(!tc.passed || tc.actual || tc.error) && (
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-white/5 pt-3">
+                                                        <div className="space-y-1.5 flex flex-col items-start">
+                                                            <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Actual Output</span>
+                                                            <pre className={`w-full p-2.5 bg-slate-900/60 border border-white/5 rounded-xl font-mono text-[10px] overflow-x-auto custom-scrollbar select-all whitespace-pre-wrap text-left ${tc.passed ? "text-emerald-400" : "text-rose-400"}`}>
+                                                                {tc.actual !== null ? tc.actual : "None"}
+                                                            </pre>
+                                                        </div>
+                                                        <div className="space-y-1.5 flex flex-col items-start">
+                                                            <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Error Details</span>
+                                                            <pre className="w-full p-2.5 bg-slate-900/60 border border-white/5 rounded-xl text-rose-400/90 font-mono text-[10px] overflow-x-auto custom-scrollbar select-all whitespace-pre-wrap text-left">
+                                                                {tc.error ? tc.error : "None"}
+                                                            </pre>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -640,12 +757,41 @@ export default function InterviewFeedback({ feedback, reference: propReference }
                                 </div>
 
                                 {/* Code Block Mock IDE */}
-                                {reference.pseudocode && (
+                                {(reference.pseudocode || reference.pseudocode_cpp || reference.pseudocode_java) && (
                                     <div className="space-y-2">
-                                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-sm text-[#137fec]">code</span>
-                                            Optimal Reference Code
-                                        </h4>
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-sm text-[#137fec]">code</span>
+                                                Optimal Reference Code
+                                            </h4>
+                                            {/* Language switcher tabs */}
+                                            <div className="flex items-center gap-1 bg-[#161b22]/80 p-0.5 rounded-xl border border-white/5">
+                                                {[
+                                                    { id: 'python', label: 'Python' },
+                                                    { id: 'cpp', label: 'C++' },
+                                                    { id: 'java', label: 'Java' }
+                                                ].map((lang) => {
+                                                    const isAvailable = lang.id === 'python' ? !!reference.pseudocode :
+                                                                        lang.id === 'cpp' ? !!reference.pseudocode_cpp :
+                                                                        !!reference.pseudocode_java;
+                                                    if (!isAvailable) return null;
+                                                    const isActive = selectedLang.toLowerCase() === lang.id;
+                                                    return (
+                                                        <button
+                                                            key={lang.id}
+                                                            onClick={() => setSelectedLang(lang.id)}
+                                                            className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
+                                                                isActive
+                                                                    ? 'bg-[#137fec]/15 text-[#137fec] border border-[#137fec]/20'
+                                                                    : 'text-slate-500 hover:text-slate-300 border border-transparent'
+                                                            }`}
+                                                        >
+                                                            {lang.label}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
                                         <div className="border border-white/5 bg-[#080b11]/80 rounded-2xl overflow-hidden shadow-2xl relative">
                                             {/* Header Mock bar */}
                                             <div className="flex items-center justify-between px-4 py-2.5 bg-[#0d1117]/80 border-b border-white/5 select-none">
@@ -653,7 +799,9 @@ export default function InterviewFeedback({ feedback, reference: propReference }
                                                     <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80"></div>
                                                     <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80"></div>
                                                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></div>
-                                                    <span className="text-[10px] text-slate-400 ml-2 font-mono">solution.py</span>
+                                                    <span className="text-[10px] text-slate-400 ml-2 font-mono font-bold">
+                                                        {getFilenameForLanguage(selectedLang)}
+                                                    </span>
                                                 </div>
                                                 <button
                                                     onClick={handleCopyCode}
@@ -664,7 +812,9 @@ export default function InterviewFeedback({ feedback, reference: propReference }
                                                 </button>
                                             </div>
                                             {/* Code Display */}
-                                            <pre className="p-4 text-[11px] text-slate-300 font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap max-h-[300px] overflow-y-auto custom-scrollbar">{reference.pseudocode}</pre>
+                                            <pre className="p-4 text-[11px] text-slate-300 font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap max-h-[300px] overflow-y-auto custom-scrollbar">
+                                                {getCodeForLanguage(selectedLang) || `// Reference solution not available`}
+                                            </pre>
                                         </div>
                                     </div>
                                 )}

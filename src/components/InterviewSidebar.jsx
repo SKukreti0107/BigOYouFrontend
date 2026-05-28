@@ -87,9 +87,19 @@ export default function InterviewSidebar({ problem_deets = demo, onRun, curr_pha
           <h2 className="text-2xl font-bold mt-3 text-white tracking-tight leading-tight">{problem_deets.title}</h2>
         </div>
         <article className="text-slate-300 text-sm leading-relaxed space-y-4 font-light">
-          <p>
-            {problem_deets.statement}
-          </p>
+          {problem_deets.statement ? (
+            problem_deets.statement.split(/\r?\n/).map((paragraph, index) => {
+              const trimmed = paragraph.trim();
+              if (!trimmed) return null;
+              return (
+                <p 
+                  key={index} 
+                  className="whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{ __html: trimmed }} 
+                />
+              );
+            })
+          ) : null}
           <div className="my-6 rounded-xl overflow-hidden border border-white/5 shadow-2xl bg-[#020617]/90 font-mono text-xs">
             {/* Terminal Header */}
             <div className="flex items-center justify-between px-4 py-2 bg-[#0b0f19] border-b border-white/5">

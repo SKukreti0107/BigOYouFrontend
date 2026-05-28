@@ -124,6 +124,26 @@ export default function InterviewPage() {
   const [attachedSelection, setAttachedSelection] = useState("");
   const [selectionWasTruncated, setSelectionWasTruncated] = useState(false);
 
+  // Load starter code from LeetCode snippets if available and not already customized
+  useEffect(() => {
+    if (session?.problem?.code_snippets) {
+      const savedCode = sessionStorage.getItem(STORAGE_KEY);
+      const isGeneric = !savedCode || savedCode === getStarterCode(language);
+      if (isGeneric) {
+        let slugToFind = "python3";
+        if (language === "cpp") slugToFind = "cpp";
+        else if (language === "java") slugToFind = "java";
+
+        const snippets = session.problem.code_snippets;
+        const match = snippets.find(s => s.langSlug === slugToFind || s.langSlug === language);
+        if (match && match.code) {
+          setCode(match.code);
+          sessionStorage.setItem(STORAGE_KEY, match.code);
+        }
+      }
+    }
+  }, [session, language, STORAGE_KEY]);
+
   useEffect(() => {
     sessionStorage.setItem(STORAGE_KEY, code);
   }, [STORAGE_KEY, code]);
@@ -136,7 +156,25 @@ export default function InterviewPage() {
     // 2. Load new work
     const newStorageKey = `interview.editor.${sessionId}.${newLanguage}`;
     const savedCode = sessionStorage.getItem(newStorageKey);
-    const newCode = savedCode || getStarterCode(newLanguage);
+    let newCode = savedCode;
+
+    const isGeneric = !newCode || newCode === getStarterCode(newLanguage);
+    if (isGeneric) {
+      if (session?.problem?.code_snippets) {
+        let slugToFind = "python3";
+        if (newLanguage === "cpp") slugToFind = "cpp";
+        else if (newLanguage === "java") slugToFind = "java";
+
+        const snippets = session.problem.code_snippets;
+        const match = snippets.find(s => s.langSlug === slugToFind || s.langSlug === newLanguage);
+        if (match && match.code) {
+          newCode = match.code;
+        }
+      }
+      if (!newCode) {
+        newCode = getStarterCode(newLanguage);
+      }
+    }
 
     // 3. Update state
     setLanguage(newLanguage);
@@ -328,6 +366,17 @@ export default function InterviewPage() {
   const handleFeedback = async () => {
     try {
       setLoadingType('FEEDBACK');
+      console.log("Running code judging...");
+      try {
+        await api.post("/interview/judge", {
+          session_id: sessionId,
+          code: code,
+          language: language,
+        });
+      } catch (judgeErr) {
+        console.error("Failed to run silent evaluation:", judgeErr);
+      }
+
       console.log("Generating feedback...");
       let res = await api.post("/interview/feedback", {
         session_id: sessionId,
@@ -409,6 +458,17 @@ export default function InterviewPage() {
       });
 
       sessionStorage.setItem(TIMEOUT_ACTION_KEY, "END_FEEDBACK");
+
+      console.log("Running code judging on timeout...");
+      try {
+        await api.post("/interview/judge", {
+          session_id: sessionId,
+          code: code,
+          language: language,
+        });
+      } catch (judgeErr) {
+        console.error("Failed to run silent evaluation on timeout:", judgeErr);
+      }
 
       let res = await api.post("/interview/feedback", {
         session_id: sessionId,
@@ -727,8 +787,8 @@ Can you please give me a hint? Analyze my progress/code and nudge me in the righ
           ></InterviewRightSidebar>
         </main>
       ) : (
-        <main className="flex-grow flex overflow-hidden p-8 overflow-y-auto">
-          <InterviewFeedback feedback={feedbackData} reference={reference}></InterviewFeedback>
+        <main className="flex-grow flex flex-col items-center w-full overflow-hidden p-8 overflow-y-auto">
+          <InterviewFeedback feedback={feedbackData} reference={reference} language={language}></InterviewFeedback>
         </main>
       )}
 
